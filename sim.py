@@ -245,7 +245,7 @@ class Simulation:
         ################################################################
         ##################### YOUR CODE GOES HERE ######################
         ################################################################
-        pass
+        self.K = (self.p ** 2).sum() / (2 * self.mass)
 
     def sampleMB( self, removeCM=True ):
         """
@@ -280,7 +280,10 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################
-        pass
+        self.F = -1 * self.mass * omega ** 2 * self.R
+        self.U = (0.5 * self.mass * (omega * self.R) ** 2).sum()
+
+        
 
     def VVstep( self, **kwargs ):
         """
@@ -292,7 +295,10 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################
-        pass
+        self.p = self.p + 0.5 * self.F * self.dt
+        self.R = self.R + self.p * self.dt / self.mass 
+        self.evalForce(**kwargs)
+        self.p = self.p + 0.5 * self.F * self.dt
 
     def run( self, **kwargs ):
         """
@@ -313,4 +319,10 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################ 
-
+        self.evalForce(**kwargs)
+        for self.step in range(self.Nsteps):
+            self.VVstep(**kwargs)
+            self.E =  self.K = self.U
+            if(self.step % self.printfreq == 0):
+                self.dumpXYZ()
+                self.dumpThermo()
