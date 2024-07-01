@@ -50,10 +50,17 @@ params = { "omega":  7.596E13 }
 #     SimForFigDt.run(**params)
 
 
-#fig2
-SimForFig2 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig2.xyz", outname = "simForFig2.log")
-SimForFig2.run(**params)
+#fig 2
+# SimForFig2 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig2.xyz", outname = "simForFig2.log")
+# SimForFig2.run(**params)
 
+# # fig 3
+# SimForFig3 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig3.xyz", outname = "simForFig3.log")
+# SimForFig3.run(**params)
+
+#fig 4
+# SimForFig3 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig4.xyz", outname = "simForFig4.log")
+# SimForFig3.run(**params)
 
 
 print('''
