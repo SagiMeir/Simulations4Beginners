@@ -32,7 +32,8 @@ NOTE: YOUR OUTPUT XYZ FILE SHOULD BE PRINTED IN ANGSTROM, BUT YOU CAN USE
 ANY UNITS YOU WANT IN BETWEEN.
 
 """
+mysim = Simulation( dt=0.1E-15, R=np.array([[5/1E10,0,0]]),p = np.array([[0,0,0]]),Nsteps=10000, mass = 6.6E-26, kind =["Ar"], fac = 1E10, xyzname= "c:/Users/elira/programMD/sim.xyz",  outname = "c:/Users/elira/programMD/sim.log")
 
-################################################################
-####################### YOUR CODE GOES HERE ####################
-################################################################
+params ={"omega": 1.2E16}
+
+mysim.run(**params)

@@ -93,7 +93,7 @@ class Simulation:
         self.outfile = open( outname, 'w' ) 
         
         #simulation
-        self.temp=temp
+        self.temp = temp
         self.Nsteps = Nsteps 
         self.dt = dt 
         self.seed = seed 
@@ -224,11 +224,12 @@ class Simulation:
         None.
         """
            
-        df = pd.read_csv( inpname, sep="\s+", skiprows=2, header=None )
+        df = pd.read_csv( inpname, sep="\s+", skiprows=2, header=None ,engine='python')
         
         self.kind = df[ 0 ]
         self.R = df[ [1,2,3] ].to_numpy()
         self.Natoms = self.R.shape[0]
+    
         
         
 ################################################################
@@ -242,10 +243,10 @@ class Simulation:
         -------
         None. Sets the value of self.K.
         """
-        ################################################################
-        ##################### YOUR CODE GOES HERE ######################
-        ################################################################
-        pass
+        self.K = (self.p ** 2). sum() / 2 / self.mass
+        
+
+        
 
     def sampleMB( self, removeCM=True ):
         """
@@ -277,10 +278,8 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################
-        pass
+        self.F = -1 * self.R * self.mass * omega**2 
+        self.U = 0.5 * self.mass * omega**2 * (self.R**2).sum()
 
     def VVstep( self, **kwargs ):
         """
@@ -289,11 +288,16 @@ class Simulation:
         -------
         None. Sets self.R, self.p.
         """
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################
-        pass
+        self.p = self.p + 0.5 * self.F * self.dt
+        
+        self.R = self.R + self.p/self.mass*self.dt
 
+        self.evalForce(**kwargs)       
+
+        self.p= self.p + 0.5*self.F*self.dt
+
+
+        
     def run( self, **kwargs ):
         """
         THIS FUNCTION DEFINES WHAT THE SIMULATION DOES, GIVEN AN INSTANCE OF 
@@ -308,9 +312,21 @@ class Simulation:
         Returns
         -------
         None.
-        """      
-        
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################ 
+        """
+        self.evalForce(**kwargs)   
+
+        for self.step in range(self.Nsteps):
+            self.VVstep(**kwargs)
+            self.CalcKinE()
+            self.E = self.K + self.U
+
+            if self.step % self.printfreq == 0:
+                self.dumpThermo()
+                self.dumpXYZ()
+
+
+
+
+            
+
 
