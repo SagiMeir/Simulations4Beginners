@@ -322,6 +322,7 @@ class Simulation:
         self.evalForce(**kwargs)
         for self.step in range(self.Nsteps):
             self.VVstep(**kwargs)
+            self.CalcKinE()
             self.E =  self.K = self.U
             if(self.step % self.printfreq == 0):
                 self.dumpXYZ()

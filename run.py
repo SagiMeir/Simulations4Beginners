@@ -36,6 +36,6 @@ ANY UNITS YOU WANT IN BETWEEN.
 ################################################################
 ####################### YOUR CODE GOES HERE ####################
 ################################################################
-ExSim = Simulation(dt = 0.1E-15, R= np.array([[5,0,0]]) * 1E-10, p= 0, Nsteps= 10000, mass = 6.633E-26, kind = ["Ar"], fac=1E10)
+ExSim = Simulation(dt = 0.1E-18, R= np.array([[5,0,0]]) * 1E-10, p = np.array([[0,0,0]]), Nsteps= 10000, mass = 6.633E-26, kind = ["Ar"], fac=1E10)
 params = { "omega":  1.209E16 }
 ExSim.run(**params)
