@@ -39,14 +39,20 @@ ANY UNITS YOU WANT IN BETWEEN.
 
 params = { "omega":  7.596E13 }
 
-for i, dt in enumerate(np.linspace(0.1E-15, 1E-15, 5)):
-    SimForFig1 = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig1_" + str(i) + ".xyz", outname = "simForFig1_" + str(i) + ".log")
-    SimForFig1.run(**params)
+#fig1
+# for i, dt in enumerate(np.linspace(0.1E-15, 1E-15, 5)):
+#     SimForFig1 = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig1_" + str(i) + ".xyz", outname = "simForFig1_" + str(i) + ".log")
+#     SimForFig1.run(**params)
 
-for i, dt in enumerate(np.linspace(0.1E-15, 1E-15, 5)):
-    SimForFigDt = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForFigDt_" + str(i) + ".xyz", outname = "SimForFigDt_" + str(i) + ".log")
-    SimForFigDt.run(**params)
+#figDt
+# for i, dt in enumerate(np.linspace(0.5E-15, 1E-15, 7)):
+#     SimForFigDt = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForFigDt_" + str(i) + ".xyz", outname = "SimForFigDt_" + str(i) + ".log")
+#     SimForFigDt.run(**params)
 
+
+#fig2
+SimForFig2 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig2.xyz", outname = "simForFig2.log")
+SimForFig2.run(**params)
 
 
 
