@@ -40,7 +40,7 @@ class Simulation:
         R : numpy.ndarray, optional
             Particles' positions, Natoms x 3 array. The default is None.
             
-        mass : numpy.ndarray, optional
+        mass : float, optional
             Particles' masses, Natoms x 1 array. The default is None.
             
         kind : list of str, optional
@@ -274,7 +274,7 @@ class Simulation:
             The frequency of the trap.
         Returns
         -------
-        None. Sets the value of self.F, self.U and self.K
+        None. Sets the value of self.F and self.U 
         """
         
         ################################################################
