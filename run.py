@@ -34,8 +34,9 @@ ANY UNITS YOU WANT IN BETWEEN.
 """
 
 
-mysim = Simulation(dt = 0.1E-17, R = np.array([[5/1E10,0,0]]), Nsteps = 100000, mass = 6.6E-26, kind = ["Ar"], fac = 1E10,printfreq=100, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz",  outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.log")
-params ={"omega": 7.56E13}
+
+mysim = Simulation(dt = 0.1E-17, R = np.array([[5/1E10,0,0]]), Nsteps = 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10,printfreq=1000, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz",  outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.log")
+params ={"omega": 7.596E13}
 mysim.run(**params)
 
 
