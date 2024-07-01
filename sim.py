@@ -243,7 +243,7 @@ class Simulation:
         -------
         None. Sets the value of self.K.
         """
-        self.K = (self.p ** 2). sum() / 2 / self.mass
+        self.K = (self.p ** 2). sum() / (2 *self.mass)
         
 
         
@@ -290,7 +290,7 @@ class Simulation:
         """
         self.p = self.p + 0.5 * self.F * self.dt
         
-        self.R = self.R + self.p/self.mass*self.dt
+        self.R = self.R + self.p *self.dt /self.mass
 
         self.evalForce(**kwargs)       
 
@@ -313,9 +313,9 @@ class Simulation:
         -------
         None.
         """
-        self.evalForce(**kwargs)   
 
         for self.step in range(self.Nsteps):
+            self.evalForce(**kwargs)
             self.VVstep(**kwargs)
             self.CalcKinE()
             self.E = self.K + self.U
