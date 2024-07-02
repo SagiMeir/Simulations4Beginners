@@ -329,9 +329,10 @@ class Simulation:
     def VVstep_NVT(self, **kwargs):
         Xi1 = np.random.randn()
         Xi2 = np.random.randn()
-        self.p = math.exp(-self.gamma * self.dt /2) + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi1
+        #self.evalForce(**kwargs)
+        self.p = math.exp(-self.gamma * self.dt /2) * self.p + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi1 * np.array([1,0,0])
         self.VVstep_NVE(**kwargs)
-        self.p = math.exp(-self.gamma * self.dt /2) + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi2
+        self.p = math.exp(-self.gamma * self.dt /2) * self.p + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi2 * np.array([1,0,0])
 
 
     def run( self, **kwargs ):
