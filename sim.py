@@ -23,7 +23,8 @@ class Simulation:
                  printfreq:int = 1000, 
                  xyzname:str = "sim.xyz", 
                  fac:float = 1.0,  
-                 outname:str = "sim.log"
+                 outname:str = "sim.log",
+                 momentname:str = "moment.log"
                  ) -> None:
         """
         Parameters
@@ -91,6 +92,7 @@ class Simulation:
         self.printfreq = printfreq 
         self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
+        self.momentfile = open( momentname, 'w')
         
         #simulation
         self.temp=temp
@@ -210,6 +212,18 @@ class Simulation:
                               "{:.6e}".format( self.R[i,2]*self.fac ) + "\n" )
         
         self.xyzfile.flush()
+
+    def dumpMoment(self) -> None:
+        if(self.step == 0):
+            self.momentfile.write( "pX pY pZ \n" )
+        
+        for i in range( self.Natoms ):
+            self.momentfile.write(
+                        "{:.6e}".format( self.p[i,0]*self.fac ) + " " + \
+                        "{:.6e}".format( self.p[i,1]*self.fac ) + " " + \
+                        "{:.6e}".format( self.p[i,2]*self.fac ) + "\n" )
+
+
     
     def readXYZ( self, inpname:str ) -> None:
         """
@@ -284,7 +298,6 @@ class Simulation:
         self.U = (0.5 * self.mass * (omega * self.R) ** 2).sum()
 
         
-
     def VVstep( self, **kwargs ):
         """
         THIS FUNCTIONS PERFORMS ONE VELOCITY VERLET STEP.
@@ -327,3 +340,4 @@ class Simulation:
             if(self.step % self.printfreq == 0):
                 self.dumpXYZ()
                 self.dumpThermo()
+                self.dumpMoment()
