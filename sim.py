@@ -25,7 +25,7 @@ class Simulation:
                  fac:float = 1.0,  
                  outname:str = "sim.log",
                  momentaname:str = "momenta.log",
-                 gamma:float = 1E10,
+                 gamma:float = 1E11,
                  VVtype:str = ""
                 ) -> None:
         """
@@ -188,7 +188,7 @@ class Simulation:
                           + "{:.6e}".format(self.K) + " " \
                           + "{:.6e}".format(self.U) + " " \
                           + "{:.6e}".format(self.E) + " " \
-                          + "{:.6e}".format(self.temp) + "\n" )
+                          + "{:.6e}".format(self.systemp) + "\n" )
         
         self.outfile.flush()
                 
@@ -242,11 +242,6 @@ class Simulation:
 ################################################################
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
-
-
-
-    def CalcTemp(self):
-        self.temp = self.Natoms*2* self.K / BOLTZMANN
     
     def evalVVstep( self, **kwargs ) -> None:
         
@@ -271,6 +266,7 @@ class Simulation:
         """
 
         self.K = (self.p ** 2).sum() / (2 * self.mass)
+        self.systemp = self.Natoms*2* self.K / BOLTZMANN
 
     def sampleMB( self, removeCM=True ):
         """
@@ -352,7 +348,6 @@ class Simulation:
         for self.step in range(self.Nsteps):
             self.evalVVstep(**kwargs)
             self.CalcKinE()
-            self.CalcTemp()
             self.E =  self.K + self.U
 
             if(self.step % self.printfreq == 0):
