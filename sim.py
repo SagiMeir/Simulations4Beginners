@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.constants import Boltzmann as BOLTZMANN
 from scipy.constants import hbar
+import math 
 
 class Simulation:
     
@@ -23,8 +24,11 @@ class Simulation:
                  printfreq:int = 1000, 
                  xyzname:str = "sim.xyz", 
                  fac:float = 1.0,  
-                 outname:str = "sim.log"
-                 ) -> None:
+                 outname:str = "sim.log",
+                 momentaname:str = "momenta.log",
+                 gamma:float = 1E11,
+                 VVtype:str = ""
+                ) -> None:
         """
         Parameters
         ----------
@@ -91,6 +95,7 @@ class Simulation:
         self.printfreq = printfreq 
         self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
+        self.momentafile = open(momentaname, 'w')
         
         #simulation
         self.temp=temp
@@ -99,6 +104,8 @@ class Simulation:
         self.seed = seed 
         self.step = step         
         self.fac = fac
+        self.VVtype = VVtype
+        self.gamma = gamma
         
         #system        
         if R is not None:
@@ -148,6 +155,7 @@ class Simulation:
         """
         self.xyzfile.close()
         self.outfile.close()
+        self.momentafile.close()
     
     def evalForce( self, **kwargs ) -> None:
         """
@@ -175,12 +183,13 @@ class Simulation:
         None.
         """
         if( self.step == 0 ):
-            self.outfile.write( "step K U E \n" )
+            self.outfile.write( "step K U E T \n" )
         
         self.outfile.write( str(self.step) + " " \
                           + "{:.6e}".format(self.K) + " " \
                           + "{:.6e}".format(self.U) + " " \
-                          + "{:.6e}".format(self.E) + "\n" )
+                          + "{:.6e}".format(self.E) + " " \
+                          + "{:.6e}".format(self.temp) + "\n" )
         
         self.outfile.flush()
                 
@@ -234,6 +243,23 @@ class Simulation:
 ################################################################
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
+    def CalcTemp(self):
+        for i in range(self.Natoms):
+            self.temp = 2* self.K / BOLTZMANN
+    
+    def evalVVstep( self, **kwargs ) -> None:
+        
+        getattr(self, "VVstep" + self.VVtype)(**kwargs)
+
+    def VVstep_NVT(self,**kwargs):
+        xi = np.random.randn(3)
+        self.p = (math.exp(-1*self.gamma*self.dt/2)*self.p + math.sqrt(BOLTZMANN*self.mass*self.temp)*math.sqrt(1-math.exp(-1*self.gamma*self.dt))*xi)*np.array([[1,0,0]])
+
+        self.VVstep(**kwargs)
+
+        xi = np.random.randn(3)
+        self.p = (math.exp(-1*self.gamma*self.dt/2)*self.p + math.sqrt(BOLTZMANN*self.mass*self.temp)*math.sqrt(1-math.exp(-1*self.gamma*self.dt))*xi)*np.array([[1,0,0]])
+
 
     def CalcKinE( self ):
         """
@@ -242,9 +268,7 @@ class Simulation:
         -------
         None. Sets the value of self.K.
         """
-        ################################################################
-        ##################### YOUR CODE GOES HERE ######################
-        ################################################################
+
         self.K = (self.p ** 2).sum() / (2 * self.mass)
 
     def sampleMB( self, removeCM=True ):
@@ -264,7 +288,6 @@ class Simulation:
         ################################################################
         pass
 
-
     def evalHarm( self, omega:float ):
         """
         THIS FUNCTION EVALUATES THE POTENTIAL AND FORCE FOR A HARMONIC TRAP.
@@ -277,13 +300,8 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################
         self.F = -1 * self.mass * omega ** 2 * (self.R).copy()
-        self.U = (0.5 * self.mass * (omega * (self.R).copy()) ** 2).sum()
-
-        
+        self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  
 
     def VVstep( self, **kwargs ):
         """
@@ -292,13 +310,26 @@ class Simulation:
         -------
         None. Sets self.R, self.p.
         """
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################
+
         self.p = (self.p).copy() + 0.5 * (self.F).copy() * self.dt
+
         self.R = (self.R).copy() + (self.p).copy() * self.dt / self.mass 
+
         self.evalForce(**kwargs)
+
         self.p = (self.p).copy() + 0.5 * (self.F).copy() * self.dt
+
+
+    def dumpMomnta( self ) -> None:
+        if( self.step == 0 ):
+            self.momentafile.write( "MOMENTA_X MOMENTA_Y MOMENTA_Z" +"\n" )
+
+        for i in range( self.Natoms ):
+            self.momentafile.write( "{:.6e}".format( self.p[i,0]*self.fac ) + " " + \
+                              "{:.6e}".format( self.p[i,1]*self.fac ) + " " + \
+                              "{:.6e}".format( self.p[i,2]*self.fac ) + "\n")
+        
+        self.momentafile.flush()
 
     def run( self, **kwargs ):
         """
@@ -314,7 +345,8 @@ class Simulation:
         Returns
         -------
         None.
-        """      
+        """
+
         
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
@@ -322,12 +354,13 @@ class Simulation:
         self.evalForce(**kwargs)
         
         for self.step in range(self.Nsteps):
-            self.VVstep(**kwargs)
+            self.evalVVstep(**kwargs)
             self.CalcKinE()
+            self.CalcTemp()
             self.E =  self.K + self.U
 
             if(self.step % self.printfreq == 0):
                 self.dumpXYZ()
                 self.dumpThermo()
+                self.dumpMomnta()
         
-        print("done")
