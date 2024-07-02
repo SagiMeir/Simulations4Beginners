@@ -66,9 +66,18 @@ params = { "omega":  7.596E13 }
 # SimForFig5 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig5.xyz", outname = "simForFig5.log", momentname= "simForFig5_p.log")
 # SimForFig5.run(**params)
 
-# fig for temp vs time
-SimForPos_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForPos_NVT.xyz", outname = "simForPos_NVT.log", momentname= "simForPos_NVT_p.log", mtype="NVT")
-SimForPos_NVT.run(**params)
+# for pos vs time
+# SimForPos_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 300000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForPos_NVT.xyz", outname = "simForPos_NVT.log", momentname= "simForPos_NVT_p.log", mtype="NVT")
+# SimForPos_NVT.run(**params)
+
+# for temp vs time
+# SimForTemp_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 300000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForTemp_NVT.xyz", outname = "simForTemp_NVT.log", momentname= "simForTemp_NVT_p.log", mtype="NVT")
+# SimForTemp_NVT.run(**params)
+
+# after remove the start
+# SimForTempAndPosAfterTheStart_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 300000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForTempAndPosAfterTheStart_NVT.xyz", outname = "SimForTempAndPosAfterTheStart_NVT.log", momentname= "SimForTempAndPosAfterTheStart_NVT_p.log", mtype="NVT", startingStep=120000)
+# SimForTempAndPosAfterTheStart_NVT.run(**params)
+
 
 
 

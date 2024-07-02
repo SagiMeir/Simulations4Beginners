@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from scipy.constants import Boltzmann as BOLTZMANN
 from scipy.constants import hbar
-import math
 
 class Simulation:
     
@@ -27,7 +26,9 @@ class Simulation:
                  fac:float = 1.0,  
                  outname:str = "sim.log",
                  momentname:str = "moment.log",
-                 gamma:float = 1E11
+                 gamma:float = 1E11,
+                 numOfDim:int = 1,
+                 startingStep:int = 0
                  ) -> None:
         """
         Parameters
@@ -105,6 +106,8 @@ class Simulation:
         self.step = step         
         self.fac = fac
         self.gamma = gamma
+        self.numOfDim = numOfDim
+        self.startingStep = startingStep
         
         #system        
         if R is not None:
@@ -148,6 +151,14 @@ class Simulation:
         else:
             raise ValueError("Wrong mtype value - use NVT or NVE")
         
+        match self.numOfDim:
+            case 2:
+                self.dim = np.array([1,1,0])
+            case 3:
+                self.dim = np.array([1,1,1])
+            case _:
+                self.dim = np.array([1,0,0])
+        
 
     def __del__( self ) -> None:
         """
@@ -189,13 +200,14 @@ class Simulation:
         -------
         None.
         """
-        if( self.step == 0 ):
-            self.outfile.write( "step K U E \n" )
+        if( self.step == self.startingStep ):
+            self.outfile.write( "step K U E temp\n" )
         
         self.outfile.write( str(self.step) + " " \
                           + "{:.6e}".format(self.K) + " " \
                           + "{:.6e}".format(self.U) + " " \
-                          + "{:.6e}".format(self.E) + "\n" )
+                          + "{:.6e}".format(self.E) + " " \
+                          + "{:.6e}".format(self.systemTemp) + "\n")
         
         self.outfile.flush()
                 
@@ -274,6 +286,10 @@ class Simulation:
         ################################################################
         self.K = (self.p ** 2).sum() / (2 * self.mass)
 
+    def CalcTemp(self):
+        self.systemTemp = 2 * self.K * self.Natoms / BOLTZMANN
+
+
     def sampleMB( self, removeCM=True ):
         """
         THIS FUNCTIONS SAMPLES INITIAL MOMENTA FROM THE MB DISTRIBUTION.
@@ -327,12 +343,12 @@ class Simulation:
         self.p = self.p + 0.5 * self.F * self.dt
 
     def VVstep_NVT(self, **kwargs):
-        Xi1 = np.random.randn()
-        Xi2 = np.random.randn()
+        Xi1 = np.random.randn(3)
+        Xi2 = np.random.randn(3)
         #self.evalForce(**kwargs)
-        self.p = math.exp(-self.gamma * self.dt /2) * self.p + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi1 * np.array([1,0,0])
+        self.p = np.exp(-self.gamma * self.dt /2) * self.p + np.sqrt(BOLTZMANN * self.temp * self.mass) * np.sqrt(1 - np.exp(-self.gamma * self.dt)) * Xi1 * self.dim
         self.VVstep_NVE(**kwargs)
-        self.p = math.exp(-self.gamma * self.dt /2) * self.p + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi2 * np.array([1,0,0])
+        self.p = np.exp(-self.gamma * self.dt /2) * self.p + np.sqrt(BOLTZMANN * self.temp * self.mass) * np.sqrt(1 - np.exp(-self.gamma * self.dt)) * Xi2 * self.dim
 
 
     def run( self, **kwargs ):
@@ -358,8 +374,9 @@ class Simulation:
         for self.step in range(self.Nsteps):
             self.evalMethod(**kwargs)
             self.CalcKinE()
+            self.CalcTemp()
             self.E =  self.K + self.U
-            if(self.step % self.printfreq == 0):
+            if(self.step % self.printfreq == 0 and self.step >= self.startingStep):
                 self.dumpXYZ()
                 self.dumpThermo()
                 self.dumpMoment()
