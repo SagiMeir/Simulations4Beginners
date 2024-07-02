@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.constants import Boltzmann as BOLTZMANN
 from scipy.constants import hbar
+import math
 
 class Simulation:
     
@@ -18,13 +19,15 @@ class Simulation:
                  U:Optional[float] = None, 
                  K:Optional[float] = None, 
                  seed:Optional[int] = 937142, 
-                 ftype:str = "Harm", 
+                 ftype:str = "Harm",
+                 mtype:str = "NVE", 
                  step:int = 0, 
                  printfreq:int = 1000, 
                  xyzname:str = "sim.xyz", 
                  fac:float = 1.0,  
                  outname:str = "sim.log",
-                 momentname:str = "moment.log"
+                 momentname:str = "moment.log",
+                 gamma:float = 1E11
                  ) -> None:
         """
         Parameters
@@ -101,6 +104,7 @@ class Simulation:
         self.seed = seed 
         self.step = step         
         self.fac = fac
+        self.gamma = gamma
         
         #system        
         if R is not None:
@@ -139,6 +143,11 @@ class Simulation:
         else:
             raise ValueError("Wrong ftype value - use Harm or Anharm.")
         
+        if(mtype == "NVT" or "NVE"):
+            self.mtype = "VVstep_" + mtype
+        else:
+            raise ValueError("Wrong mtype value - use NVT or NVE")
+        
 
     def __del__( self ) -> None:
         """
@@ -150,6 +159,7 @@ class Simulation:
         """
         self.xyzfile.close()
         self.outfile.close()
+        self.momentfile.close()
     
     def evalForce( self, **kwargs ) -> None:
         """
@@ -160,6 +170,9 @@ class Simulation:
         None. Calls the correct method based on self.ftype.
         """
         getattr(self, self.ftype)(**kwargs)
+
+    def evalMethod(self, **kwargs) -> None:
+        getattr(self, self.mtype)(**kwargs)
     
     def dumpThermo( self ) -> None:
         """
@@ -298,7 +311,7 @@ class Simulation:
         self.U = (0.5 * self.mass * (omega * self.R) ** 2).sum()
 
         
-    def VVstep( self, **kwargs ):
+    def VVstep_NVE( self, **kwargs ):
         """
         THIS FUNCTIONS PERFORMS ONE VELOCITY VERLET STEP.
         Returns
@@ -312,6 +325,14 @@ class Simulation:
         self.R = self.R + self.p * self.dt / self.mass 
         self.evalForce(**kwargs)
         self.p = self.p + 0.5 * self.F * self.dt
+
+    def VVstep_NVT(self, **kwargs):
+        Xi1 = np.random.randn()
+        Xi2 = np.random.randn()
+        self.p = math.exp(-self.gamma * self.dt /2) + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi1
+        self.VVstep_NVE(**kwargs)
+        self.p = math.exp(-self.gamma * self.dt /2) + math.sqrt(BOLTZMANN * self.temp * self.mass) * math.sqrt(1 - math.exp(-self.gamma * self.dt)) * Xi2
+
 
     def run( self, **kwargs ):
         """
@@ -334,7 +355,7 @@ class Simulation:
         ################################################################ 
         self.evalForce(**kwargs)
         for self.step in range(self.Nsteps):
-            self.VVstep(**kwargs)
+            self.evalMethod(**kwargs)
             self.CalcKinE()
             self.E =  self.K + self.U
             if(self.step % self.printfreq == 0):

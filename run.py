@@ -63,8 +63,12 @@ params = { "omega":  7.596E13 }
 # SimForFig4.run(**params)
 
 #fig 5
-SimForFig5 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig5.xyz", outname = "simForFig5.log", momentname= "simForFig5_p.log")
-SimForFig5.run(**params)
+# SimForFig5 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForFig5.xyz", outname = "simForFig5.log", momentname= "simForFig5_p.log")
+# SimForFig5.run(**params)
+
+# fig for temp vs time
+SimForTemp = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForTemp.xyz", outname = "simForTemp.log", momentname= "simForTemp_p.log", mtype="NVT")
+SimForTemp.run(**params)
 
 
 
