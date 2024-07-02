@@ -78,8 +78,14 @@ params = { "omega":  7.596E13 }
 # SimForTempAndPosAfterTheStart_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 300000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForTempAndPosAfterTheStart_NVT.xyz", outname = "SimForTempAndPosAfterTheStart_NVT.log", momentname= "SimForTempAndPosAfterTheStart_NVT_p.log", mtype="NVT", startingStep=120000)
 # SimForTempAndPosAfterTheStart_NVT.run(**params)
 
+# for best gamma
+# for i, gamma in enumerate(np.linspace(1E11, 1E15, 5)):
+#     simForGamma = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForGamma" + str(i) + ".xyz", outname = "simForGamma" + str(i) + ".log", momentname= "simForGamma_p" + str(i) + ".log", mtype="NVT", startingStep=120000, gamma= gamma)
+#     simForGamma.run(**params)
 
-
+# hist in the best gamma
+simForHist = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForHist.xyz", outname = "simForGammaHist.log", momentname= "simForHist_p.log", mtype="NVT", startingStep=120000, gamma= 7.596E13)
+simForHist.run(**params)
 
 print('''
   _____     ____    _   _   ______ 

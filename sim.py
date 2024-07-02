@@ -239,7 +239,7 @@ class Simulation:
         self.xyzfile.flush()
 
     def dumpMoment(self) -> None:
-        if(self.step == 0):
+        if(self.step == self.startingStep):
             self.momentfile.write( "pX pY pZ \n" )
         
         for i in range( self.Natoms ):
