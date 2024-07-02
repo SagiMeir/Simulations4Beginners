@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import os
+os.chdir("c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners")
 from sim import Simulation
 
 """
@@ -35,13 +37,15 @@ ANY UNITS YOU WANT IN BETWEEN.
 
 
 
-mysim = Simulation(dt = 0.1E-17, R = np.array([[5/1E10,0,0]]), Nsteps = 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10,printfreq=1000, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz",  outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.log")
-params ={"omega": 7.596E13}
-mysim.run(**params)
+# mysim = Simulation(dt = 0.1E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps = 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10,printfreq=1000, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz",  outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.log")
+# params ={"omega": 7.596E13}
+# mysim.run(**params)
+
+params = { "omega":  7.596E13 }
 
 
-
-
+SimForFig2 = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz", outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.log")
+SimForFig2.run(**params)
 
 """
 
