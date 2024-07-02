@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from scipy.constants import Boltzmann as BOLTZMANN
 from scipy.constants import hbar
-import math 
 
 class Simulation:
     
@@ -26,7 +25,7 @@ class Simulation:
                  fac:float = 1.0,  
                  outname:str = "sim.log",
                  momentaname:str = "momenta.log",
-                 gamma:float = 1E11,
+                 gamma:float = 1E10,
                  VVtype:str = ""
                 ) -> None:
         """
@@ -243,22 +242,24 @@ class Simulation:
 ################################################################
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
+
+
+
     def CalcTemp(self):
-        for i in range(self.Natoms):
-            self.temp = 2* self.K / BOLTZMANN
+        self.temp = self.Natoms*2* self.K / BOLTZMANN
     
     def evalVVstep( self, **kwargs ) -> None:
         
         getattr(self, "VVstep" + self.VVtype)(**kwargs)
 
     def VVstep_NVT(self,**kwargs):
-        xi = np.random.randn(3)
-        self.p = (math.exp(-1*self.gamma*self.dt/2)*self.p + math.sqrt(BOLTZMANN*self.mass*self.temp)*math.sqrt(1-math.exp(-1*self.gamma*self.dt))*xi)*np.array([[1,0,0]])
+        xi = np.random.randn(3)*np.array([[1,0,0]])
+        self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
 
         self.VVstep(**kwargs)
 
-        xi = np.random.randn(3)
-        self.p = (math.exp(-1*self.gamma*self.dt/2)*self.p + math.sqrt(BOLTZMANN*self.mass*self.temp)*math.sqrt(1-math.exp(-1*self.gamma*self.dt))*xi)*np.array([[1,0,0]])
+        xi = np.random.randn(3)*np.array([[1,0,0]])
+        self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
 
 
     def CalcKinE( self ):
@@ -310,7 +311,6 @@ class Simulation:
         -------
         None. Sets self.R, self.p.
         """
-
         self.p = (self.p).copy() + 0.5 * (self.F).copy() * self.dt
 
         self.R = (self.R).copy() + (self.p).copy() * self.dt / self.mass 
@@ -347,10 +347,6 @@ class Simulation:
         None.
         """
 
-        
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################ 
         self.evalForce(**kwargs)
         
         for self.step in range(self.Nsteps):
