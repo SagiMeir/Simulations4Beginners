@@ -4,7 +4,7 @@ import os
 os.chdir("c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners")
 from sim import Simulation
 
-# params = { "omega":  7.596E13 }
+params = { "omega":  7.596E13 }
 
 
 
@@ -14,5 +14,5 @@ from sim import Simulation
 #     gammaSim.run(**params)
 
 
-gammaSim = Simulation(gamma = 1E15, VVtype = "_NVT",dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 300000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz", outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim15.log")
-
+gammaSim = Simulation(gamma = 6.3095E13, VVtype = "_NVT",dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 400000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim.xyz", outname = "c:/Users/elira/OneDrive/Documents/GitHub/Simulations4Beginners/sim15.log")
+gammaSim.run(**params)
