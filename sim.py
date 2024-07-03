@@ -141,10 +141,10 @@ class Simulation:
         np.random.seed( self.seed )
         
         #check force type
-        if ( ftype == "Harm" or ftype == "Anharm"):
+        if ( ftype == "Harm" or ftype == "DoubleWell"):
             self.ftype = "eval" + ftype
         else:
-            raise ValueError("Wrong ftype value - use Harm or Anharm.")
+            raise ValueError("Wrong ftype value - use Harm or DoubleWell")
         
         if(mtype == "NVT" or "NVE"):
             self.mtype = "VVstep_" + mtype
@@ -326,6 +326,12 @@ class Simulation:
         self.F = -1 * self.mass * omega ** 2 * self.R
         self.U = (0.5 * self.mass * (omega * self.R) ** 2).sum()
 
+    def evalDoubleWell(self):
+        A = 4.11E20
+        B = 8.22
+        self.F = (-4 * A * self.R ** 3).sum() + (2 * B * self.R).sum()
+        self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
+
         
     def VVstep_NVE( self, **kwargs ):
         """
@@ -337,10 +343,10 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################
-        self.p = self.p + 0.5 * self.F * self.dt
-        self.R = self.R + self.p * self.dt / self.mass 
+        self.p = (self.p + 0.5 * self.F * self.dt) * self.dim
+        self.R = (self.R + self.p * self.dt / self.mass) * self.dim
         self.evalForce(**kwargs)
-        self.p = self.p + 0.5 * self.F * self.dt
+        self.p = (self.p + 0.5 * self.F * self.dt) * self.dim
 
     def VVstep_NVT(self, **kwargs):
         Xi1 = np.random.randn(3)

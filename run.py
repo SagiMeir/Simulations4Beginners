@@ -84,8 +84,30 @@ params = { "omega":  7.596E13 }
 #     simForGamma.run(**params)
 
 # hist in the best gamma
-simForHist = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForHist.xyz", outname = "simForGammaHist.log", momentname= "simForHist_p.log", mtype="NVT", startingStep=120000, gamma= 7.596E13)
-simForHist.run(**params)
+# simForHist = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForHist.xyz", outname = "simForHist.log", momentname= "simForHist_p.log", mtype="NVT", startingStep=120000, gamma= 7.596E13)
+# simForHist.run(**params)
+
+
+#############################################################################
+################################metadynamics#################################
+#############################################################################
+
+
+# to find new best dt
+# for i, dt in enumerate(np.linspace(1E-16, 2E-15, 7)):
+#     SimFor2WDt = Simulation(dt, R= np.array([[2,0,0]]) * 1E-10, Nsteps= 300000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimFor2WDt" + str(i) + ".xyz", outname = "SimFor2WDt" + str(i) + ".log", momentname= "SimFor2WDt" + str(i) + "_p.log", ftype="DoubleWell")
+#     SimFor2WDt.run()
+
+
+#  without MD in 2 well
+simFor2Well = Simulation(dt = 0.833E-15, R= np.array([[2,0,0]]) * 1E-10, Nsteps= 250000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simFor2Well.xyz", outname = "simFor2Well.log", momentname= "simFor2Well_p.log", mtype="NVE", ftype="DoubleWell")
+simFor2Well.run()
+
+
+
+
+
+
 
 print('''
   _____     ____    _   _   ______ 
