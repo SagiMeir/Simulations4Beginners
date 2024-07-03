@@ -290,7 +290,7 @@ class Simulation:
         self.systemTemp = 2 * self.K * self.Natoms / BOLTZMANN
 
 
-    def sampleMB( self, removeCM=True ):
+    def sampleMB( self ):
         """
         THIS FUNCTIONS SAMPLES INITIAL MOMENTA FROM THE MB DISTRIBUTION.
         IT ALSO REMOVES THE COM MOMENTA, IF REQUESTED.
@@ -305,7 +305,8 @@ class Simulation:
         ################################################################
         ##################### YOUR CODE GOES HERE ######################
         ################################################################
-        pass
+        self.p = np.random.normal(0,self.mass * np.sqrt(BOLTZMANN * self.temp) * 1E10, size=(self.Natoms, self.numOfDim)) * self.dim
+        print(self.p * self.fac)
 
 
     def evalHarm( self, omega:float ):
@@ -351,7 +352,6 @@ class Simulation:
     def VVstep_NVT(self, **kwargs):
         Xi1 = np.random.randn(3)
         Xi2 = np.random.randn(3)
-        #self.evalForce(**kwargs)
         self.p = np.exp(-self.gamma * self.dt /2) * self.p + np.sqrt(BOLTZMANN * self.temp * self.mass) * np.sqrt(1 - np.exp(-self.gamma * self.dt)) * Xi1 * self.dim
         self.VVstep_NVE(**kwargs)
         self.p = np.exp(-self.gamma * self.dt /2) * self.p + np.sqrt(BOLTZMANN * self.temp * self.mass) * np.sqrt(1 - np.exp(-self.gamma * self.dt)) * Xi2 * self.dim
@@ -376,6 +376,8 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################ 
+
+        self.sampleMB()
         self.evalForce(**kwargs)
         for self.step in range(self.Nsteps):
             self.evalMethod(**kwargs)

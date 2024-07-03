@@ -89,7 +89,7 @@ params = { "omega":  7.596E13 }
 
 
 #############################################################################
-################################metadynamics#################################
+################################METADYNAMICS#################################
 #############################################################################
 
 
@@ -100,10 +100,12 @@ params = { "omega":  7.596E13 }
 
 
 #  without MD in 2 well
-simFor2Well = Simulation(dt = 0.833E-15, R= np.array([[2,0,0]]) * 1E-10, Nsteps= 250000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simFor2Well.xyz", outname = "simFor2Well.log", momentname= "simFor2Well_p.log", mtype="NVE", ftype="DoubleWell")
+simFor2Well = Simulation(dt = 0.833E-15, R= np.array([[0.1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simFor2Well.xyz", outname = "simFor2Well.log", momentname= "simFor2Well_p.log", mtype="NVE", ftype="DoubleWell")
 simFor2Well.run()
 
-
+#  without MD in 2 well
+simFor2Well_NVT = Simulation(dt = 0.833E-15, R= np.array([[0.1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simFor2Well_NVT.xyz", outname = "simFor2Well_NVT.log", momentname= "simFor2Well_NVT_p.log", mtype="NVT", ftype="DoubleWell", gamma= 7.596E13, startingStep=120000)
+simFor2Well_NVT.run()
 
 
 
