@@ -93,9 +93,16 @@ class Simulation:
         
         #general        
         self.printfreq = printfreq 
-        self.xyzfile = open( xyzname, 'w' ) 
+        #self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
-        self.momentafile = open(momentaname, 'w')
+        #self.momentafile = open(momentaname, 'w')
+
+        # self.openfiles = []
+        # self.filenames =["sim" + str(i) + ".xyz" for i in range(beads)]
+        # # for file in self.filenames:
+        # #        self.openfiles.append( open( file, 'w' ) )
+
+
         
         #simulation
         self.temp=temp
@@ -105,9 +112,10 @@ class Simulation:
         self.step = step         
         self.fac = fac
         self.VVtype = VVtype
-        self.gamma = gamma
         self.beads = beads
-        self.beadomega = np.sqrt(self.beads)*BOLTZMANN*self.temp/hbar 
+        self.gamma = gamma
+        self.beadomega = np.sqrt(self.beads)*BOLTZMANN*self.temp/hbar
+
         
         #system        
         if R is not None:
@@ -155,8 +163,12 @@ class Simulation:
         -------
         None.
         """
-        self.xyzfile.close()
+        # self.momentafile.close()
+        # self.xyzfile.close()
         self.outfile.close()
+        # for file in self.openfiles:
+        #    file.close()
+
     
     def evalForce( self, **kwargs ) -> None:
         """
@@ -184,18 +196,19 @@ class Simulation:
         None.
         """
         if( self.step == 0 ):
-            self.outfile.write( "step K U E T SpringEnergy\n" )
+            self.outfile.write( "step K U E T SpringEnergy QE\n" )
         
         self.outfile.write(str(self.step) + " " \
                           + "{:.6e}".format(self.K) + " " \
                           + "{:.6e}".format(self.U) + " " \
                           + "{:.6e}".format(self.E) + " " \
                           + "{:.6e}".format(self.systemp)+" " \
+                          + "{:.6e}".format(self.QE)+" " \
                           + "{:.6e}".format(self.totspringE) + "\n" )
         
         self.outfile.flush()
                 
-    def dumpXYZ( self , i ) -> None:
+    def dumpXYZ( self ) -> None:
         """
         THIS FUNCTION DUMP THE COORDINATES OF THE SYSTEM IN XYZ FORMAT TO FILE.
         Parameters
@@ -210,13 +223,15 @@ class Simulation:
         -------
         None.
         """
-        self.xyzname = "sim"+str(i)+".xyz"    
+        # self.xyzname = "sim"+str(i)+".xyz"    
         
-        self.xyzfile.write( str( self.Natoms ) + "\n")
-        self.xyzfile.write( "Step " + str( self.step ) + "\n" )
-        
+
+
         for k in range( self.beads ):
-            self.xyzfile.write( self.kind[i] + " " + \
+            for i in range(self.Natoms):
+                self.openfiles[k].write( str( self.Natoms ) + "\n")
+                self.openfiles[k].write( "Step " + str( self.step ) + "\n" )
+                self.openfiles[k].write( self.kind[i] + " " + \
                         "{:.6e}".format( self.R[i,0,k]*self.fac ) + " " + \
                         "{:.6e}".format( self.R[i,1,k]*self.fac ) + " " + \
                         "{:.6e}".format( self.R[i,2,k]*self.fac ) + "\n" )
@@ -246,28 +261,42 @@ class Simulation:
 ################################################################
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
+    def calcQE(self):
+        self.QE = self.beads*BOLTZMANN*self.temp/2
+        for i in range(self.Natoms):
+            for k in range(self.beads - 1):
+                self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[i,0,k+1] - self.R[i,0,k])**2
+            self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[i,0,self.beads - 1] - self.R[i,0,0])**2
 
-    def CalcsSpringE(self):
-        self.E = 0
-        self.totspringE = 0          
+        for i in range(self.Natoms):
+            self.QE += self.U/self.beads
+
+    def CalcSpringEF(self):
+        self.totspringE = 0
         
         for i in range(self.Natoms):
             for k in range(self.beads-1):
                 self.totspringE += 0.5 * self.mass * self.beadomega ** 2 * (self.R[i,0,k+1] - self.R[i,0,k])**2
+                self.F[i,:,k] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[i,:,k] - self.R[i,:,k+1] - self.R[i,:,k-1])
             self.totspringE += 0.5 * self.mass * self.beadomega**2*(self.R[i,0,self.beads-1] - self.R[i,0,0])**2
+            self.F[i,:,self.beads-1] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[i,:,self.beads-1] - self.R[i,:,0] - self.R[i,:,self.beads-2])
 
     def evalVVstep( self, **kwargs ) -> None:
         
         getattr(self, "VVstep" + self.VVtype)(**kwargs)
 
     def VVstep_NVT(self,**kwargs):
-        xi = np.random.randn(3)*np.array([[1,0,0]])
+        xi = np.random.randn(1,3,self.beads)
+        xi[0,1:3,:] = np.array([0 for i in range(self.beads)])
         self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
 
         self.VVstep(**kwargs)
+        # print("h")
 
-        xi = np.random.randn(3)*np.array([[1,0,0]])
+        xi = np.random.randn(1,3,self.beads)
+        xi[0,1:3,:] = np.array([0 for i in range(self.beads)])
         self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
+
 
     def CalcKinE( self ):
         """
@@ -278,7 +307,7 @@ class Simulation:
         """
 
         self.K = (self.p ** 2).sum() / (2 * self.mass)
-        self.systemp = self.Natoms*2* self.K / BOLTZMANN
+        self.systemp =  self.K / BOLTZMANN / self.beads /self.Natoms * 2
 
     def sampleMB( self, removeCM=True ):
         """
@@ -292,18 +321,9 @@ class Simulation:
         -------
         None. Sets the value of self.p.
         """
-        self.p = self.p *0 
-
         for i in range(self.Natoms):
             for k in range(self.beads):
-                self.p[i,0,k] = np.random.randn(3)
-
-    def evalspringf(self):
-        
-        for i in range(self.Natoms):
-            for k in range(self.beads):
-                self.F[i,:,k] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[i,:,k] - self.R[i+1,:,k] - self.R[i-1,:,k])
-
+                self.p[i,:,k] = np.random.randn(3)*(np.sqrt(BOLTZMANN*self.temp/self.mass))*np.array([[1,0,0]])*self.mass
 
     def evalHarm( self, omega:float ):
         """
@@ -317,7 +337,7 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        self.potf = self.mass * omega ** 2* (self.R).sum()      
+        self.potF = -self.mass * omega ** 2* self.R      
         self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  
 
     def VVstep( self, **kwargs ):
@@ -328,24 +348,15 @@ class Simulation:
         None. Sets self.R, self.p.
         """
 
-        # self.p[0,:,0] *= np.array([1,0,0])
-        # self.R[0,:,0] *= np.array([1,0,0])
-        # self.F[0,:,0] *= np.array([1,0,0])
-        
-        self.p = (self.p).copy() + 0.5 * (self.F).copy() * self.dt
+        self.p = (self.p).copy() + 0.5 * (self.F+self.potF).copy() * self.dt
+
 
         self.R = (self.R).copy() + (self.p).copy() * self.dt / self.mass 
 
-        # print(self.R ,"________R") 
-        # print(self.F, "________F")
-        # print(self.p,"________p")
-
         self.evalForce(**kwargs)
+        self.CalcSpringEF()
 
-        self.F -= self.potf/self.beads
-
-        self.p = (self.p).copy() + 0.5 * (self.F).copy() * self.dt
-
+        self.p = (self.p).copy() + 0.5 * (self.F+self.potF).copy() * self.dt
 
     def dumpMomnta( self ) -> None:
         if( self.step == 0 ):
@@ -353,6 +364,7 @@ class Simulation:
 
         for i in range( self.Natoms ):
             for k in range(self.beads):
+                self.momentafile.write("bid " + str(k)+"\n")
                 self.momentafile.write( "{:.6e}".format( self.p[i,0,k]*self.fac ) + " " + \
                                         "{:.6e}".format( self.p[i,1,k]*self.fac ) + " " + \
                                         "{:.6e}".format( self.p[i,2,k]*self.fac ) + "\n")
@@ -376,18 +388,18 @@ class Simulation:
         """
 
         self.evalForce(**kwargs)
-        
+        if(self.beadomega >= self.gamma):
+            self.gamma = self.beadomega
+        print(self.gamma)
         for self.step in range(self.Nsteps):
             self.evalVVstep(**kwargs)
             self.CalcKinE()
-            self.CalcsSpringE()
+            self.calcQE()
             self.E =  self.K + self.U + self.totspringE
-
 
             if(self.step % self.printfreq == 0):
                 
                 self.dumpThermo()
-                self.dumpMomnta()
-                for i in range(self.Natoms):
-                    self.dumpXYZ(i)
+                #self.dumpMomnta()
+                #self.dumpXYZ()
         
