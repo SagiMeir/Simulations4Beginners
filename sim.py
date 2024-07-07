@@ -262,26 +262,28 @@ class Simulation:
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
     def calcQE(self):
-        self.QE = self.beads*BOLTZMANN*self.temp/2
 
-        for i in range(self.Natoms):
-            for k in range(self.beads - 1):
-                self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[i,0,k+1] - self.R[i,0,k])**2
-            self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[i,0,self.beads - 1] - self.R[i,0,0])**2
+        self.QE = (self.R / 2 * (- self.potF)).sum()
 
-        for i in range(self.Natoms):
-            self.QE += self.U/self.beads
+        # self.QE = self.beads*BOLTZMANN*self.temp/2
+
+        # for atom in range(self.Natoms):
+        #     for ibead in range(self.beads - 1):
+        #         self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[atom,0,ibead+1] - self.R[atom,0,ibead])**2
+        #     self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[atom,0,self.beads - 1] - self.R[atom,0,0])**2
+
+        self.QE += self.U/self.beads
 
 
     def CalcSpringEF(self):
         self.totspringE = 0
         
-        for i in range(self.Natoms):
-            for k in range(self.beads-1):
-                self.totspringE += 0.5 * self.mass * self.beadomega ** 2 * (self.R[i,0,k+1] - self.R[i,0,k])**2
-                self.F[i,:,k] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[i,:,k] - self.R[i,:,k+1] - self.R[i,:,k-1])
-            self.totspringE += 0.5 * self.mass * self.beadomega**2*(self.R[i,0,self.beads-1] - self.R[i,0,0])**2
-            self.F[i,:,self.beads-1] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[i,:,self.beads-1] - self.R[i,:,0] - self.R[i,:,self.beads-2])
+        for atom in range(self.Natoms):
+            for ibead in range(self.beads-1):
+                self.totspringE += 0.5 * self.mass * self.beadomega ** 2 * (self.R[atom,0,ibead+1] - self.R[atom,0,ibead])**2
+                self.F[atom,:,ibead] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[atom,:,ibead] - self.R[atom,:,ibead+1] - self.R[atom,:,ibead-1])
+            self.totspringE += 0.5 * self.mass * self.beadomega**2*(self.R[atom,0,self.beads-1] - self.R[atom,0,0])**2
+            self.F[atom,:,self.beads-1] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[atom,:,self.beads-1] - self.R[atom,:,0] - self.R[atom,:,self.beads-2]) 
 
     def evalVVstep( self, **kwargs ) -> None:
         
@@ -339,7 +341,7 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        self.potF = -self.mass * omega ** 2* self.R      
+        self.potF = - self.mass * omega ** 2* self.R / self.beads
         self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  
 
     def VVstep( self, **kwargs ):
