@@ -263,17 +263,8 @@ class Simulation:
 ################################################################
     def calcQE(self):
 
-        self.QE = (self.R / 2 * (- self.potF)).sum()
-
-        # self.QE = self.beads*BOLTZMANN*self.temp/2
-
-        # for atom in range(self.Natoms):
-        #     for ibead in range(self.beads - 1):
-        #         self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[atom,0,ibead+1] - self.R[atom,0,ibead])**2
-        #     self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[atom,0,self.beads - 1] - self.R[atom,0,0])**2
-
+        self.QE = self.Natoms*BOLTZMANN*self.temp+((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * (- self.potF)).sum()
         self.QE += self.U/self.beads
-
 
     def CalcSpringEF(self):
         self.totspringE = 0
@@ -295,7 +286,6 @@ class Simulation:
         self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
 
         self.VVstep(**kwargs)
-        # print("h")
 
         xi = np.random.randn(1,3,self.beads)
         xi[0,1:3,:] = np.array([0 for i in range(self.beads)])
@@ -360,7 +350,7 @@ class Simulation:
         self.evalForce(**kwargs)
         self.CalcSpringEF()
 
-        self.p = (self.p).copy() + 0.5 * (self.F+self.potF).copy() * self.dt
+        self.p = (self.p).copy() + 0.5 * (self.F + self.potF).copy() * self.dt
 
     def dumpMomnta( self ) -> None:
         if( self.step == 0 ):
