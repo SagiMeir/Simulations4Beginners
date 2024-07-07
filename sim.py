@@ -117,8 +117,8 @@ class Simulation:
         self.w = w
         self.sigma = sigma
         self.Vbias = Vbias
-        self.gaussianPos = []
         self.withMedaD = withMetaD
+        self.gaussiansPos = []
 
         
         #system        
@@ -126,7 +126,7 @@ class Simulation:
             self.R = R        
             self.mass = mass
             self.kind = kind
-            self.Natoms = self.R.shape[0]
+            self.Natoms = R.shape[0]
             # self.mass_matrix = np.array( [self.mass,]*3 ).transpose()
         else:
             self.R = np.zeros( (1,3) )
@@ -341,14 +341,21 @@ class Simulation:
         self.F = (-4 * A * self.R ** 3) + (2 * B * self.R) 
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
-    def updateMetaD(self):
+    def updateMetaD(self, count):
         #self.evalDoubleWell()
-        currentPos = self.R.copy()
-        for i in range(self.Natoms):
-            self.gaussianPos.append([currentPos[0,0], currentPos[0,1], currentPos[0,2]])
-        center = self.gaussianPos[-1]
-        self.Vbias += self.w * np.exp(-(self.R - center) ** 2 / 2 * self.sigma ** 2)
-        self.F += self.w / self.sigma ** 2 * (center - self.R) * np.exp(-(center - self.R) ** 2 / 2 * self.sigma ** 2)
+        # currentPos = self.R.copy()
+        # for i in range(self.Natoms):
+        #     self.gaussianPos.append([currentPos[i,0], currentPos[i,1], currentPos[i,2]])
+        # center = self.gaussianPos[-1]
+        # self.Vbias += self.w * np.exp(-(self.R - center) ** 2 / 2 * self.sigma ** 2)
+        # self.F += self.w / self.sigma ** 2 * (center - self.R) * np.exp(-(center - self.R) ** 2 / 2 * self.sigma ** 2)
+        
+        #self.gaussiansPos.append([self.R, count])
+        self.gaussiansPos.append(self.R)
+        diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
+        self.Vbias += self.w * (np.exp(-diff ** 2 / 2 * self.sigma ** 2)).sum(0)
+        self.F += self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / 2 * self.sigma ** 2))).sum(0)
+
     
     def VVstep_NVE( self, **kwargs ):
         """
@@ -387,7 +394,7 @@ class Simulation:
         None.
         """      
         
-        
+        count = 0
         self.sampleMB()
         self.evalForce(**kwargs)
         for self.step in range(self.Nsteps):
@@ -401,5 +408,6 @@ class Simulation:
                 self.dumpMoment()
                 #self.dumpForce()
                 if(self.withMedaD):
-                    self.updateMetaD()
-        print(self.gaussianPos)
+                    self.updateMetaD(count)
+                    count += 1
+        print(self.gaussiansPos)

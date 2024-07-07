@@ -69,7 +69,7 @@ params = { "omega":  7.596E13 }
 # simFor2Well.run()
 
 #  without MD in 2 well
-# simFor2Well_NVT = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simFor2Well_NVT.xyz", outname = "simFor2Well_NVT.log", momentname= "simFor2Well_NVT_p.log", forcenamme="simFor2Well_NVT_F", mtype="NVT", ftype="DoubleWell", gamma= 7.596E13, startingStep=120000)
+# simFor2Well_NVT = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simFor2Well_NVT.xyz", outname = "simFor2Well_NVT.log", momentname= "simFor2Well_NVT_p.log", mtype="NVT", ftype="DoubleWell", gamma= 7.596E13, startingStep=120000)
 # simFor2Well_NVT.run()
 
 # MetaD 2 Well
