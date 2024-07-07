@@ -196,7 +196,7 @@ class Simulation:
         None.
         """
         if( self.step == 0 ):
-            self.outfile.write( "step K U E T SpringEnergy QE\n" )
+            self.outfile.write( "step K U E T QE SpringEnergy\n" )
         
         self.outfile.write(str(self.step) + " " \
                           + "{:.6e}".format(self.K) + " " \
@@ -263,6 +263,7 @@ class Simulation:
 ################################################################
     def calcQE(self):
         self.QE = self.beads*BOLTZMANN*self.temp/2
+
         for i in range(self.Natoms):
             for k in range(self.beads - 1):
                 self.QE -= (self.mass*self.beads*(BOLTZMANN*self.temp)**2/(2*hbar**2))  *  (self.R[i,0,k+1] - self.R[i,0,k])**2
@@ -270,6 +271,7 @@ class Simulation:
 
         for i in range(self.Natoms):
             self.QE += self.U/self.beads
+
 
     def CalcSpringEF(self):
         self.totspringE = 0
@@ -390,7 +392,7 @@ class Simulation:
         self.evalForce(**kwargs)
         if(self.beadomega >= self.gamma):
             self.gamma = self.beadomega
-        print(self.gamma)
+        print(self.Natoms)
         for self.step in range(self.Nsteps):
             self.evalVVstep(**kwargs)
             self.CalcKinE()
@@ -398,7 +400,7 @@ class Simulation:
             self.E =  self.K + self.U + self.totspringE
 
             if(self.step % self.printfreq == 0):
-                
+
                 self.dumpThermo()
                 #self.dumpMomnta()
                 #self.dumpXYZ()
