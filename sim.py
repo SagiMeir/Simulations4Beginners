@@ -16,7 +16,8 @@ class Simulation:
                  p:Optional[np.ndarray] = None, 
                  F:Optional[np.ndarray] = None, 
                  U:Optional[float] = None, 
-                 K:Optional[float] = None, 
+                 K:Optional[float] = None,
+                 Vbias:Optional[np.ndarray] = np.zeros((1,3)), 
                  seed:Optional[int] = 937142, 
                  ftype:str = "Harm",
                  mtype:str = "NVE", 
@@ -26,9 +27,13 @@ class Simulation:
                  fac:float = 1.0,  
                  outname:str = "sim.log",
                  momentname:str = "moment.log",
+                 #forcenamme:str = "force.log",
                  gamma:float = 1E11,
                  numOfDim:int = 1,
-                 startingStep:int = 0
+                 startingStep:int = 0,
+                 w:int = 1,
+                 sigma:int = 1,
+                 withMetaD:bool = False
                  ) -> None:
         """
         Parameters
@@ -97,6 +102,7 @@ class Simulation:
         self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
         self.momentfile = open( momentname, 'w')
+        #self.forcefile = open( forcenamme, 'w')
         
         #simulation
         self.temp=temp
@@ -108,6 +114,12 @@ class Simulation:
         self.gamma = gamma
         self.numOfDim = numOfDim
         self.startingStep = startingStep
+        self.w = w
+        self.sigma = sigma
+        self.Vbias = Vbias
+        self.gaussianPos = []
+        self.withMedaD = withMetaD
+
         
         #system        
         if R is not None:
@@ -144,7 +156,7 @@ class Simulation:
         if ( ftype == "Harm" or ftype == "DoubleWell"):
             self.ftype = "eval" + ftype
         else:
-            raise ValueError("Wrong ftype value - use Harm or DoubleWell")
+            raise ValueError("Wrong ftype value - use Right type")
         
         if(mtype == "NVT" or "NVE"):
             self.mtype = "VVstep_" + mtype
@@ -171,6 +183,7 @@ class Simulation:
         self.xyzfile.close()
         self.outfile.close()
         self.momentfile.close()
+        #self.forcefile.close()
     
     def evalForce( self, **kwargs ) -> None:
         """
@@ -247,9 +260,18 @@ class Simulation:
                         "{:.6e}".format( self.p[i,0]*self.fac ) + " " + \
                         "{:.6e}".format( self.p[i,1]*self.fac ) + " " + \
                         "{:.6e}".format( self.p[i,2]*self.fac ) + "\n" )
-
-
+            
     
+    # def dumpForce(self) -> None:
+    #     if(self.step == self.startingStep):
+    #         self.forcefile.write( "FX FY FZ \n" )
+        
+    #     for i in range( self.Natoms ):
+    #         self.forcefile.write(
+    #                     "{:.6e}".format( self.F[i,0] ) + " " + \
+    #                     "{:.6e}".format( self.F[i,1] ) + " " + \
+    #                     "{:.6e}".format( self.F[i,2] ) + "\n" )        
+
     def readXYZ( self, inpname:str ) -> None:
         """
         THIS FUNCTION READS THE INITIAL COORDINATES IN XYZ FORMAT.
@@ -269,11 +291,6 @@ class Simulation:
         self.R = df[ [1,2,3] ].to_numpy()
         self.Natoms = self.R.shape[0]
         
-        
-################################################################
-################## NO EDITING ABOVE THIS LINE ##################
-################################################################
-
     def CalcKinE( self ):
         """
         THIS FUNCTIONS EVALUATES THE KINETIC ENERGY OF THE SYSTEM.
@@ -281,9 +298,6 @@ class Simulation:
         -------
         None. Sets the value of self.K.
         """
-        ################################################################
-        ##################### YOUR CODE GOES HERE ######################
-        ################################################################
         self.K = (self.p ** 2).sum() / (2 * self.mass)
 
     def CalcTemp(self):
@@ -302,9 +316,6 @@ class Simulation:
         -------
         None. Sets the value of self.p.
         """
-        ################################################################
-        ##################### YOUR CODE GOES HERE ######################
-        ################################################################
         self.p = np.random.normal(0,self.mass * np.sqrt(BOLTZMANN * self.temp) * 1E10, size=(self.Natoms, self.numOfDim)) * self.dim
         print(self.p * self.fac)
 
@@ -321,19 +332,24 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################
         self.F = -1 * self.mass * omega ** 2 * self.R
         self.U = (0.5 * self.mass * (omega * self.R) ** 2).sum()
 
     def evalDoubleWell(self):
         A = 4.11E20
         B = 8.22
-        self.F = (-4 * A * self.R ** 3).sum() + (2 * B * self.R).sum()
+        self.F = (-4 * A * self.R ** 3) + (2 * B * self.R) 
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
-        
+    def updateMetaD(self):
+        #self.evalDoubleWell()
+        currentPos = self.R.copy()
+        for i in range(self.Natoms):
+            self.gaussianPos.append([currentPos[0,0], currentPos[0,1], currentPos[0,2]])
+        center = self.gaussianPos[-1]
+        self.Vbias += self.w * np.exp(-(self.R - center) ** 2 / 2 * self.sigma ** 2)
+        self.F += self.w / self.sigma ** 2 * (center - self.R) * np.exp(-(center - self.R) ** 2 / 2 * self.sigma ** 2)
+    
     def VVstep_NVE( self, **kwargs ):
         """
         THIS FUNCTIONS PERFORMS ONE VELOCITY VERLET STEP.
@@ -341,9 +357,7 @@ class Simulation:
         -------
         None. Sets self.R, self.p.
         """
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################
+
         self.p = (self.p + 0.5 * self.F * self.dt) * self.dim
         self.R = (self.R + self.p * self.dt / self.mass) * self.dim
         self.evalForce(**kwargs)
@@ -373,18 +387,19 @@ class Simulation:
         None.
         """      
         
-        ################################################################
-        ####################### YOUR CODE GOES HERE ####################
-        ################################################################ 
-
+        
         self.sampleMB()
         self.evalForce(**kwargs)
         for self.step in range(self.Nsteps):
             self.evalMethod(**kwargs)
             self.CalcKinE()
             self.CalcTemp()
-            self.E =  self.K + self.U
+            self.E =  self.K + self.U + (self.Vbias).sum()
             if(self.step % self.printfreq == 0 and self.step >= self.startingStep):
                 self.dumpXYZ()
                 self.dumpThermo()
                 self.dumpMoment()
+                #self.dumpForce()
+                if(self.withMedaD):
+                    self.updateMetaD()
+        print(self.gaussianPos)
