@@ -379,6 +379,9 @@ class Simulation:
         self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
         self.R = (self.R + self.p * self.dt / self.mass) * self.dim
         self.evalForce(**kwargs)
+        if(self.withMedaD and self.step % self.MetaDfreq == 0 and self.step >= self.MetaDfreq):
+            self.updateMetaD()
+            # self.dumpGaussiansPos()
         self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
 
     def VVstep_NVT(self, **kwargs):
@@ -414,9 +417,6 @@ class Simulation:
             self.E =  self.K + self.U + (self.Vbias).sum()
 
             if(self.step % self.printfreq == 0 and self.step >= self.startingStep):
-                if(self.withMedaD):
-                    self.updateMetaD()
-                    # self.dumpGaussiansPos()
                 self.dumpXYZ()
                 self.dumpThermo()
                 self.dumpMoment()
