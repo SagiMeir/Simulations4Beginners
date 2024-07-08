@@ -379,7 +379,7 @@ class Simulation:
         self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
         self.R = (self.R + self.p * self.dt / self.mass) * self.dim
         self.evalForce(**kwargs)
-        if(self.withMedaD and self.step % self.MetaDfreq == 0 and self.step >= self.MetaDfreq):
+        if(self.withMedaD and self.step >= self.startingStep + self.MetaDfreq):
             self.updateMetaD()
             # self.dumpGaussiansPos()
         self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
