@@ -28,7 +28,7 @@ class Simulation:
                  fac:float = 1.0,  
                  outname:str = "sim.log",
                  momentname:str = "moment.log",
-                 #forcenamme:str = "force.log",
+                 forcenamme:str = "force.log",
                  #gaussiansname:str = "gaussiansPos.log",
                  gamma:float = 1E11,
                  numOfDim:int = 1,
@@ -104,7 +104,7 @@ class Simulation:
         self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
         self.momentfile = open( momentname, 'w')
-        #self.forcefile = open( forcenamme, 'w')
+        self.forcefile = open( forcenamme, 'w')
         
         #simulation
         self.temp=temp
@@ -188,8 +188,8 @@ class Simulation:
         self.xyzfile.close()
         self.outfile.close()
         self.momentfile.close()
-        #self.forcefile.close()
-        self.gaussiansfile.close()
+        self.forcefile.close()
+        #self.gaussiansfile.close()
     
     def evalForce( self, **kwargs ) -> None:
         """
@@ -247,7 +247,7 @@ class Simulation:
         """
             
         self.xyzfile.write( str( self.Natoms ) + "\n")
-        self.xyzfile.write( "Step " + str( self.step - self.startingStep ) + "\n" )
+        self.xyzfile.write( "Step " + str( self.step ) + "\n" )
         
         for i in range( self.Natoms ):
             self.xyzfile.write( self.kind[i] + " " + \
@@ -267,16 +267,19 @@ class Simulation:
                         "{:.6e}".format( self.p[i,1]*self.fac ) + " " + \
                         "{:.6e}".format( self.p[i,2]*self.fac ) + "\n" )
             
+        self.momentfile.flush()
+            
     
-    # def dumpForce(self) -> None:
-    #     if(self.step == self.startingStep):
-    #         self.forcefile.write( "FX FY FZ \n" )
+    def dumpForce(self) -> None:
+        if(self.step == self.startingStep):
+            self.forcefile.write( "FX FY FZ \n" )
         
-    #     for i in range( self.Natoms ):
-    #         self.forcefile.write(
-    #                     "{:.6e}".format( self.F[i,0] ) + " " + \
-    #                     "{:.6e}".format( self.F[i,1] ) + " " + \
-    #                     "{:.6e}".format( self.F[i,2] ) + "\n" )     
+        for i in range( self.Natoms ):
+            self.forcefile.write(
+                        "{:.6e}".format( self.F[i,0] ) + " " + \
+                        "{:.6e}".format( self.F[i,1] ) + " " + \
+                        "{:.6e}".format( self.F[i,2] ) + "\n" )   
+        self.forcefile.flush()  
 
     # def dumpGaussiansPos(self) -> None:
     #     if(self.step == self.startingStep):
@@ -355,7 +358,7 @@ class Simulation:
         self.F = (-4 * A * self.R ** 3) + (2 * B * self.R) 
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
-    def updateMetaD(self, count):
+    def updateMetaD(self):
         self.gaussiansPos.append(self.R)
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
         self.Vbias += self.w * (np.exp(-diff ** 2 / 2 * self.sigma ** 2)).sum(0)
@@ -399,24 +402,21 @@ class Simulation:
         None.
         """      
         
-        count = 0
         self.sampleMB()
         self.evalForce(**kwargs)
-        for self.step in range(self.startingStep, self.Nsteps + self.startingStep):
-            if(self.step >= self.startingStep):
-                self.evalMethod(**kwargs)
-                self.CalcKinE()
-                self.CalcTemp()
-                self.E =  self.K + self.U + (self.Vbias).sum()
+        for self.step in range(self.Nsteps):
+            self.evalMethod(**kwargs)
+            self.CalcKinE()
+            self.CalcTemp()
+            self.E =  self.K + self.U + (self.Vbias).sum()
 
-                if(self.withMedaD and self.step % self.MetaDfreq == 0):
-                    self.updateMetaD(count)
-                    count += 1
-                    # self.dumpGaussiansPos()
+            if(self.withMedaD and self.step % self.MetaDfreq == 0 and self.step >= self.startingStep):
+                self.updateMetaD()
+                # self.dumpGaussiansPos()
 
-                if(self.step % self.printfreq == 0):
-                    self.dumpXYZ()
-                    self.dumpThermo()
-                    self.dumpMoment()
-                    #self.dumpForce()
-        print(self.gaussiansPos)
+            if(self.step % self.printfreq == 0 and self.step >= self.startingStep):
+                self.dumpXYZ()
+                self.dumpThermo()
+                self.dumpMoment()
+                self.dumpForce()
+        #print(self.gaussiansPos)
