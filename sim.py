@@ -35,7 +35,8 @@ class Simulation:
                  startingStep:int = 0,
                  w:int = 1,
                  sigma:int = 1,
-                 withMetaD:bool = False
+                 withMetaD:bool = False,
+                 notUseMB:bool = False
                  ) -> None:
         """
         Parameters
@@ -122,6 +123,7 @@ class Simulation:
         self.withMedaD = withMetaD
         self.gaussiansPos = []
         self.MetaDfreq  = MetaDfreq
+        self.notUseMB = notUseMB
 
         # if(self.withMedaD):
         #     self.gaussiansfile = open( gaussiansname, 'w')
@@ -247,7 +249,7 @@ class Simulation:
         -------
         None.
         """
-            
+        
         self.xyzfile.write( str( self.Natoms ) + "\n")
         self.xyzfile.write( "Step " + str( self.step ) + "\n" )
         
@@ -320,7 +322,7 @@ class Simulation:
         self.K = (self.p ** 2).sum() / (2 * self.mass)
 
     def CalcTemp(self):
-        self.systemTemp = 2 * self.K * self.Natoms / BOLTZMANN
+        self.systemTemp = 2 * self.K / (self.Natoms * BOLTZMANN)
 
 
     def sampleMB( self ):
@@ -364,8 +366,8 @@ class Simulation:
         if(self.step % self.MetaDfreq == 0):
             self.gaussiansPos.append(self.R)
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
-        self.Vbias = self.w * (np.exp(-diff ** 2 / 2 * self.sigma ** 2)).sum(0)
-        self.imgF = self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / 2 * self.sigma ** 2))).sum(0)
+        self.Vbias = self.w * (np.exp(-diff ** 2 / (2 * self.sigma ** 2))).sum(0)
+        self.imgF = self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / (2 * self.sigma ** 2)))).sum(0)
 
     
     def VVstep_NVE( self, **kwargs ):
@@ -408,7 +410,8 @@ class Simulation:
         None.
         """      
         
-        self.sampleMB()
+        if(not self.notUseMB):
+            self.sampleMB()
         self.evalForce(**kwargs)
         for self.step in range(self.Nsteps):
             self.evalMethod(**kwargs)
@@ -421,4 +424,5 @@ class Simulation:
                 self.dumpThermo()
                 self.dumpMoment()
                 self.dumpForce()
+                print(self.step)
         #print(self.gaussiansPos)
