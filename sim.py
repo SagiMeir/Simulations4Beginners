@@ -152,6 +152,8 @@ class Simulation:
         else:
             self.F = np.zeros( (self.Natoms,3) )
             self.U = 0.0
+
+        self.imgF = np.zeros((self.Natoms ,3))
         
         
         #set seed
@@ -359,10 +361,11 @@ class Simulation:
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
     def updateMetaD(self):
-        self.gaussiansPos.append(self.R)
+        if(self.step % self.MetaDfreq == 0):
+            self.gaussiansPos.append(self.R)
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
-        self.Vbias += self.w * (np.exp(-diff ** 2 / 2 * self.sigma ** 2)).sum(0)
-        self.F += self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / 2 * self.sigma ** 2))).sum(0)
+        self.Vbias = self.w * (np.exp(-diff ** 2 / 2 * self.sigma ** 2)).sum(0)
+        self.imgF = self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / 2 * self.sigma ** 2))).sum(0)
 
     
     def VVstep_NVE( self, **kwargs ):
@@ -373,10 +376,10 @@ class Simulation:
         None. Sets self.R, self.p.
         """
 
-        self.p = (self.p + 0.5 * self.F * self.dt) * self.dim
+        self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
         self.R = (self.R + self.p * self.dt / self.mass) * self.dim
         self.evalForce(**kwargs)
-        self.p = (self.p + 0.5 * self.F * self.dt) * self.dim
+        self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
 
     def VVstep_NVT(self, **kwargs):
         Xi1 = np.random.randn(3)
@@ -410,11 +413,10 @@ class Simulation:
             self.CalcTemp()
             self.E =  self.K + self.U + (self.Vbias).sum()
 
-            if(self.withMedaD and self.step % self.MetaDfreq == 0 and self.step >= self.startingStep):
-                self.updateMetaD()
-                # self.dumpGaussiansPos()
-
             if(self.step % self.printfreq == 0 and self.step >= self.startingStep):
+                if(self.withMedaD):
+                    self.updateMetaD()
+                    # self.dumpGaussiansPos()
                 self.dumpXYZ()
                 self.dumpThermo()
                 self.dumpMoment()
