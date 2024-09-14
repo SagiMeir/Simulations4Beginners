@@ -369,7 +369,6 @@ class Simulation:
         self.Vbias = self.w * (np.exp(-diff ** 2 / (2 * self.sigma ** 2))).sum(0)
         self.imgF = self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / (2 * self.sigma ** 2)))).sum(0)
 
-    
     def VVstep_NVE( self, **kwargs ):
         """
         THIS FUNCTIONS PERFORMS ONE VELOCITY VERLET STEP.
