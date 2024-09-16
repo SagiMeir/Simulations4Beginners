@@ -30,7 +30,7 @@ class Simulation:
                  momentname:str = "moment.log",
                  forcenamme:str = "force.log",
                  #gaussiansname:str = "gaussiansPos.log",
-                 gamma:float = 1E11,
+                 gamma:float = 2.5E13,
                  numOfDim:int = 1,
                  startingStep:int = 0,
                  w:int = 1,

@@ -10,9 +10,9 @@ params = { "omega":  7.596E13 }
 #     SimForFig1.run(**params)
 
 #figDt
-# for i, dt in enumerate(np.linspace(0.5E-15, 1E-15, 7)):
-#     SimForFigDt = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForFigDt_" + str(i) + ".xyz", outname = "SimForFigDt_" + str(i) + ".log")
-#     SimForFigDt.run(**params)
+for i, dt in enumerate(np.linspace(0.5E-15, 1E-15, 7)):
+    SimForFigDt = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForFigDt_" + str(i) + ".xyz", outname = "SimForFigDt_" + str(i) + ".log")
+    SimForFigDt.run(**params)
 
 
 #fig 2
@@ -40,11 +40,11 @@ params = { "omega":  7.596E13 }
 # SimForTemp_NVT.run(**params)
 
 # after remove the start
-SimForTempAndPosAfterTheStart_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForTempAndPosAfterTheStart_NVT.xyz", outname = "SimForTempAndPosAfterTheStart_NVT.log", momentname= "SimForTempAndPosAfterTheStart_NVT_p.log", mtype="NVT", startingStep=120000)
-SimForTempAndPosAfterTheStart_NVT.run(**params)
+# SimForTempAndPosAfterTheStart_NVT = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForTempAndPosAfterTheStart_NVT.xyz", outname = "SimForTempAndPosAfterTheStart_NVT.log", momentname= "SimForTempAndPosAfterTheStart_NVT_p.log", mtype="NVT", startingStep=120000)
+# SimForTempAndPosAfterTheStart_NVT.run(**params)
 
 # for best gamma
-# for i, gamma in enumerate(np.linspace(1E11, 1E15, 5)):
+# for i, gamma in enumerate(np.linspace(1E13, 3E13, 5)):
 #     simForGamma = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForGamma" + str(i) + ".xyz", outname = "simForGamma" + str(i) + ".log", momentname= "simForGamma_p" + str(i) + ".log", mtype="NVT", startingStep=120000, gamma= gamma)
 #     simForGamma.run(**params)
 
