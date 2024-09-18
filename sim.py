@@ -20,7 +20,7 @@ class Simulation:
                  seed:Optional[int] = 937142, 
                  ftype:str = "Harm", 
                  step:int = 0, 
-                 printfreq:int = 1000, 
+                 printfreq:int = 250, 
                  xyzname:str = "sim.xyz", 
                  fac:float = 1.0,  
                  outname:str = "sim.log",
@@ -93,14 +93,14 @@ class Simulation:
         
         #general        
         self.printfreq = printfreq 
-        #self.xyzfile = open( xyzname, 'w' ) 
+        self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
         #self.momentafile = open(momentaname, 'w')
 
-        # self.openfiles = []
-        # self.filenames =["sim" + str(i) + ".xyz" for i in range(beads)]
-        # # for file in self.filenames:
-        # #        self.openfiles.append( open( file, 'w' ) )
+        self.openfiles = []
+        self.filenames =["sim" + str(i) + ".xyz" for i in range(beads)]
+        for file in self.filenames:
+                self.openfiles.append( open( file, 'w' ) )
 
 
         
@@ -164,7 +164,7 @@ class Simulation:
         None.
         """
         # self.momentafile.close()
-        # self.xyzfile.close()
+        self.xyzfile.close()
         self.outfile.close()
         # for file in self.openfiles:
         #    file.close()
@@ -261,12 +261,13 @@ class Simulation:
 ################################################################
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
+
     def calcQE(self):
 
-        self.QE = self.Natoms*BOLTZMANN*self.temp+((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * (- self.potF)).sum()
+        self.QE = 0.5*self.Natoms*BOLTZMANN*self.temp+((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * (- self.potF)).sum() #אסטימטור לאנרגיה הקוונטית
         self.QE += self.U/self.beads
 
-    def CalcSpringEF(self):
+    def CalcSpringEF(self):#מחשב את האנרגיה של הקפיץ ואז צריך להוסיף לאנרגיבה הכוללת
         self.totspringE = 0
         
         for atom in range(self.Natoms):
@@ -275,16 +276,18 @@ class Simulation:
                 self.F[atom,:,ibead] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[atom,:,ibead] - self.R[atom,:,ibead+1] - self.R[atom,:,ibead-1])
             self.totspringE += 0.5 * self.mass * self.beadomega**2*(self.R[atom,0,self.beads-1] - self.R[atom,0,0])**2
             self.F[atom,:,self.beads-1] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[atom,:,self.beads-1] - self.R[atom,:,0] - self.R[atom,:,self.beads-2]) 
+            #print(self.F)
 
     def evalVVstep( self, **kwargs ) -> None:
         
         getattr(self, "VVstep" + self.VVtype)(**kwargs)
 
     def VVstep_NVT(self,**kwargs):
+        print("1")
         xi = np.random.randn(1,3,self.beads)
         xi[0,1:3,:] = np.array([0 for i in range(self.beads)])
         self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
-
+        print("-")
         self.VVstep(**kwargs)
 
         xi = np.random.randn(1,3,self.beads)
@@ -303,7 +306,7 @@ class Simulation:
         self.K = (self.p ** 2).sum() / (2 * self.mass)
         self.systemp =  self.K / BOLTZMANN / self.beads /self.Natoms * 2
 
-    def sampleMB( self, removeCM=True ):
+    def sampleMB( self, removeCM=True ):#מתחילים את כולם ב0 ונותנים להם "דחיפה" בהתחלה
         """
         THIS FUNCTIONS SAMPLES INITIAL MOMENTA FROM THE MB DISTRIBUTION.
         IT ALSO REMOVES THE COM MOMENTA, IF REQUESTED.
@@ -315,6 +318,7 @@ class Simulation:
         -------
         None. Sets the value of self.p.
         """
+
         for i in range(self.Natoms):
             for k in range(self.beads):
                 self.p[i,:,k] = np.random.randn(3)*(np.sqrt(BOLTZMANN*self.temp/self.mass))*np.array([[1,0,0]])*self.mass
@@ -331,7 +335,7 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        self.potF = - self.mass * omega ** 2* self.R / self.beads
+        self.potF = - self.mass * omega ** 2* self.R #/ self.beads
         self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  
 
     def VVstep( self, **kwargs ):
@@ -348,7 +352,7 @@ class Simulation:
         self.R = (self.R).copy() + (self.p).copy() * self.dt / self.mass 
 
         self.evalForce(**kwargs)
-        self.CalcSpringEF()
+        #self.CalcSpringEF()
 
         self.p = (self.p).copy() + 0.5 * (self.F + self.potF).copy() * self.dt
 
@@ -366,6 +370,7 @@ class Simulation:
         self.momentafile.flush()
 
     def run( self, **kwargs ):
+        self.totspringE = 0
         """
         THIS FUNCTION DEFINES WHAT THE SIMULATION DOES, GIVEN AN INSTANCE OF 
         THE SIMULATION CLASS. YOU WILL NEED TO:
@@ -384,7 +389,7 @@ class Simulation:
         self.evalForce(**kwargs)
         if(self.beadomega >= self.gamma):
             self.gamma = self.beadomega
-        print(self.Natoms)
+        #print(self.Natoms)
         for self.step in range(self.Nsteps):
             self.evalVVstep(**kwargs)
             self.CalcKinE()
@@ -395,5 +400,5 @@ class Simulation:
 
                 self.dumpThermo()
                 #self.dumpMomnta()
-                #self.dumpXYZ()
+                self.dumpXYZ()
         
