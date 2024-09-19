@@ -36,7 +36,9 @@ class Simulation:
                  w:int = 1,
                  sigma:int = 1,
                  withMetaD:bool = False,
-                 notUseMB:bool = False
+                 notUseMB:bool = False,
+                 withPoissonDist:bool = False,
+                 isDeep:bool = False,
                  ) -> None:
         """
         Parameters
@@ -124,6 +126,11 @@ class Simulation:
         self.gaussiansPos = []
         self.MetaDfreq  = MetaDfreq
         self.notUseMB = notUseMB
+        self.withPoissonDist = withPoissonDist
+        self.numOfGaussians = 0
+        self.stepsPos = []
+        self.isDeep = isDeep
+
 
         # if(self.withMedaD):
         #     self.gaussiansfile = open( gaussiansname, 'w')
@@ -357,14 +364,22 @@ class Simulation:
         self.U = (0.5 * self.mass * (omega * self.R) ** 2).sum()
 
     def evalDoubleWell(self):
-        A = 4.11E20
-        B = 8.22
+        if(not self.isDeep):
+            A = 4.11E20
+            B = 8.22
+        else:
+            A = 4.11E19
+            B = 8.22
         self.F = (-4 * A * self.R ** 3) + (2 * B * self.R) 
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
     def updateMetaD(self):
-        if(self.step % self.MetaDfreq == 0):
+        if(self.withPoissonDist and self.step == self.stepsPos[self.numOfGaussians]):
             self.gaussiansPos.append(self.R)
+            self.numOfGaussians += 1
+        elif(self.step % self.MetaDfreq == 0):
+            self.gaussiansPos.append(self.R)
+
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
         self.Vbias = self.w * (np.exp(-diff ** 2 / (2 * self.sigma ** 2))).sum(0)
         self.imgF = self.w / self.sigma ** 2 * (diff * (np.exp(-diff ** 2 / (2 * self.sigma ** 2)))).sum(0)
@@ -409,9 +424,24 @@ class Simulation:
         None.
         """      
         
+        stepsLenght = []
+        for i in range(int(self.Nsteps * 1.5 / self.MetaDfreq)):
+            roll= np.ceil(np.random.exponential(self.MetaDfreq))
+            stepsLenght.append(roll)
+
+        self.stepsPos = [0] * len(stepsLenght)
+        
+        for i in range(len(stepsLenght)):
+            if(i == 0):
+                self.stepsPos[0] = stepsLenght[0] + self.startingStep
+            else:
+                self.stepsPos[i] = self.stepsPos[i-1] + stepsLenght[i]
+
+
         if(not self.notUseMB):
             self.sampleMB()
         self.evalForce(**kwargs)
+
         for self.step in range(self.Nsteps):
             self.evalMethod(**kwargs)
             self.CalcKinE()
@@ -424,4 +454,3 @@ class Simulation:
                 self.dumpMoment()
                 self.dumpForce()
                 print(self.step)
-        #print(self.gaussiansPos)
