@@ -10,9 +10,9 @@ params = { "omega":  7.596E13 }
 #     SimForFig1.run(**params)
 
 #figDt
-for i, dt in enumerate(np.linspace(0.5E-15, 1E-15, 7)):
-    SimForFigDt = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForFigDt_" + str(i) + ".xyz", outname = "SimForFigDt_" + str(i) + ".log")
-    SimForFigDt.run(**params)
+# for i, dt in enumerate(np.linspace(0.5E-15, 1E-15, 7)):
+#     SimForFigDt = Simulation(dt, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 100000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "SimForFigDt_" + str(i) + ".xyz", outname = "SimForFigDt_" + str(i) + ".log")
+#     SimForFigDt.run(**params)
 
 
 #fig 2
@@ -74,7 +74,14 @@ for i, dt in enumerate(np.linspace(0.5E-15, 1E-15, 7)):
 
 # MetaD 2 Well
 # simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD.xyz", outname = "simForMetaD.log", momentname="simForMetaD_p.log", forcenamme="simForMetaD_F.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=2E-20, sigma=0.5e-12)
-# simForMetaD.run()   
+# simForMetaD.run()  
+
+  
+#############################################################################
+################################RESEARCH#####################################
+#############################################################################
+
+
 
 
 
