@@ -73,13 +73,17 @@ params = { "omega":  7.596E13 }
 # simFor2Well_NVT.run()
 
 # MetaD 2 Well
-# simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD.xyz", outname = "simForMetaD.log", momentname="simForMetaD_p.log", forcenamme="simForMetaD_F.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=2E-20, sigma=0.5e-12)
+# simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD.xyz", outname = "simForMetaD.log", momentname="simForMetaD_p.log", forcenamme="simForMetaD_F.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, MetaDMode="Normal", w=2E-20, sigma=0.5e-12)
 # simForMetaD.run()  
 
   
 #############################################################################
 ################################RESEARCH#####################################
 #############################################################################
+
+# MetaD 2 Well - low MetaD rate
+simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_low.xyz", outname = "simForMetaD_low.log", momentname="simForMetaD_p_low.log", forcenamme="simForMetaD_F_low.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, MetaDMode="Normal", w=2E-21, sigma=0.5e-12, MetaDfreq=1000)
+simForMetaD.run()
 
 
 
