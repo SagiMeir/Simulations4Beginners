@@ -263,13 +263,18 @@ class Simulation:
 ################################################################
 
     def calcQE(self):
-
-        self.QE = 0.5*self.Natoms*BOLTZMANN*self.temp+((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * (- self.potF)).sum() #אסטימטור לאנרגיה הקוונטית
+        #print(0.5*self.Natoms*BOLTZMANN*self.temp)
+        #print((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * (- self.potF))
+        #print(self.U/self.beads)
+        self.QE = 0.5*self.Natoms*BOLTZMANN*self.temp+((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * ( -self.potF )/(self.beads*2)).sum() #אסטימטור לאנרגיה הקוונטית
         self.QE += self.U/self.beads
 
+        #print(self.QE)
+
+        #print("--------")
+
     def CalcSpringEF(self):#מחשב את האנרגיה של הקפיץ ואז צריך להוסיף לאנרגיבה הכוללת
-        self.totspringE = 0
-        
+        self.totspringE = 0 
         for atom in range(self.Natoms):
             for ibead in range(self.beads-1):
                 self.totspringE += 0.5 * self.mass * self.beadomega ** 2 * (self.R[atom,0,ibead+1] - self.R[atom,0,ibead])**2
@@ -283,11 +288,16 @@ class Simulation:
         getattr(self, "VVstep" + self.VVtype)(**kwargs)
 
     def VVstep_NVT(self,**kwargs):
-        print("1")
+        #print("1")
         xi = np.random.randn(1,3,self.beads)
         xi[0,1:3,:] = np.array([0 for i in range(self.beads)])
+        #print(xi)
+        #print( self.p)
         self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
-        print("-")
+        #print (self.p)
+        
+        
+        #print("-")
         self.VVstep(**kwargs)
 
         xi = np.random.randn(1,3,self.beads)
@@ -335,7 +345,7 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        self.potF = - self.mass * omega ** 2* self.R #/ self.beads
+        self.potF = - self.mass * omega ** 2* self.R / self.beads
         self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  
 
     def VVstep( self, **kwargs ):
@@ -352,7 +362,7 @@ class Simulation:
         self.R = (self.R).copy() + (self.p).copy() * self.dt / self.mass 
 
         self.evalForce(**kwargs)
-        #self.CalcSpringEF()
+        self.CalcSpringEF()
 
         self.p = (self.p).copy() + 0.5 * (self.F + self.potF).copy() * self.dt
 
@@ -400,5 +410,5 @@ class Simulation:
 
                 self.dumpThermo()
                 #self.dumpMomnta()
-                self.dumpXYZ()
+                #self.dumpXYZ()
         
