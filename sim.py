@@ -368,8 +368,8 @@ class Simulation:
             A = 4.11E20
             B = 8.22
         else:
-            A = 4.11E19
-            B = 8.22
+            A = 4.11E22
+            B = 822
         self.F = (-4 * A * self.R ** 3) + (2 * B * self.R) 
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
@@ -377,7 +377,7 @@ class Simulation:
         if(self.withPoissonDist and self.step == self.stepsPos[self.numOfGaussians]):
             self.gaussiansPos.append(self.R)
             self.numOfGaussians += 1
-        elif(self.step % self.MetaDfreq == 0):
+        if(not self.withPoissonDist and self.step % self.MetaDfreq == 0):
             self.gaussiansPos.append(self.R)
 
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
@@ -433,7 +433,7 @@ class Simulation:
         
         for i in range(len(stepsLenght)):
             if(i == 0):
-                self.stepsPos[0] = stepsLenght[0] + self.startingStep
+                self.stepsPos[0] = self.startingStep + self.MetaDfreq
             else:
                 self.stepsPos[i] = self.stepsPos[i-1] + stepsLenght[i]
 
