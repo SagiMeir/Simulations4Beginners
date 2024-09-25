@@ -49,8 +49,8 @@ params = { "omega":  7.596E13 }
 #     simForGamma.run(**params)
 
 # hist in the best gamma
-# simForHist = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForHist.xyz", outname = "simForHist.log", momentname= "simForHist_p.log", mtype="NVT", startingStep=120000, gamma= 7.596E13)
-# simForHist.run(**params)
+simForHist = Simulation(dt = 0.833E-15, R= np.array([[5,0,0]]) * 1E-10, Nsteps= 500000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForHist.xyz", outname = "simForHist.log", momentname= "simForHist_p.log", mtype="NVT", startingStep=120000, gamma= 7.596E13)
+simForHist.run(**params)
 
 
 #############################################################################
@@ -90,12 +90,12 @@ params = { "omega":  7.596E13 }
 # simForMetaD.run()
 
 # MetaD 2 Well (DEEP) - low MetaD rate
-simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowDeep.xyz", outname = "simForMetaD_lowDeep.log", momentname="simForMetaD_p_lowDeep.log", forcenamme="simForMetaD_F_lowDeep.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, isDeep=True)
-simForMetaD.run()
+# simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowDeep.xyz", outname = "simForMetaD_lowDeep.log", momentname="simForMetaD_p_lowDeep.log", forcenamme="simForMetaD_F_lowDeep.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, isDeep=True)
+# simForMetaD.run()
 
 # MetaD 2 Well (DEEP) with Poisson distribution - low MetaD rate
-simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDistDeep.xyz", outname = "simForMetaD_lowWithDistDeep.log", momentname="simForMetaD_p_lowWithDistDeep.log", forcenamme="simForMetaD_F_lowWithDistDeep.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, isDeep=True)
-simForMetaD.run()
+# simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDistDeep.xyz", outname = "simForMetaD_lowWithDistDeep.log", momentname="simForMetaD_p_lowWithDistDeep.log", forcenamme="simForMetaD_F_lowWithDistDeep.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, isDeep=True)
+# simForMetaD.run()
 
 
 
