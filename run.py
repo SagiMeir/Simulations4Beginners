@@ -73,8 +73,8 @@ params = { "omega":  7.596E13 }
 # simFor2Well_NVT.run()
 
 # MetaD 2 Well
-simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD.xyz", outname = "simForMetaD.log", momentname="simForMetaD_p.log", forcenamme="simForMetaD_F.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=2E-20, sigma=0.5e-12, MetaDfreq=10000)
-simForMetaD.run()  
+# simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD.xyz", outname = "simForMetaD.log", momentname="simForMetaD_p.log", forcenamme="simForMetaD_F.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=2E-20, sigma=0.5e-12, MetaDfreq=5000)
+# simForMetaD.run()  
 
   
 #############################################################################
@@ -97,12 +97,17 @@ simForMetaD.run()
 # simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDistDeep.xyz", outname = "simForMetaD_lowWithDistDeep.log", momentname="simForMetaD_p_lowWithDistDeep.log", forcenamme="simForMetaD_F_lowWithDistDeep.log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, isDeep=True)
 # simForMetaD.run()
 
+# MetaD 2 Well - low MetaD rate (repeat)
+for i, seedNum in enumerate([937142, 937143, 937144, 937145, 937146]):
+    simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_low" + str(i) + ".xyz", outname = "simForMetaD_low" + str(i) + ".log", momentname="simForMetaD_p_low" + str(i) + ".log", forcenamme="simForMetaD_F_low" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=5E-20, sigma=0.5e-12, MetaDfreq=5000, seed=seedNum)
+    simForMetaD.run()
 
 
 
 
 
 
+#print(simForMetaD.gaussiansPos)
 
 print('''
   _____     ____    _   _   ______ 
