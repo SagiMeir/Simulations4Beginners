@@ -299,9 +299,9 @@ class Simulation:
         for i in range(self.Natoms):
             self.gaussiansfile.write( 
                             str(self.step) + " " + \
-                            "{:.6e}".format( self.R[i,0]*self.fac ) + " " + \
-                            "{:.6e}".format( self.R[i,1]*self.fac ) + " " + \
-                            "{:.6e}".format( self.R[i,2]*self.fac ) + "\n" )  
+                            "{:.6e}".format( self.R[i,0]) + " " + \
+                            "{:.6e}".format( self.R[i,1]) + " " + \
+                            "{:.6e}".format( self.R[i,2]) + "\n" )  
 
     def readXYZ( self, inpname:str ) -> None:
         """
@@ -379,9 +379,11 @@ class Simulation:
     def updateMetaD(self):
         if(self.withPoissonDist and self.step == self.stepsPos[self.numOfGaussians]):
             self.gaussiansPos.append(self.R)
+            self.dumpGaussiansPos()
             self.numOfGaussians += 1
         if(not self.withPoissonDist and self.step % self.MetaDfreq == 0):
             self.gaussiansPos.append(self.R)
+            self.dumpGaussiansPos()
 
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
         self.Vbias = self.w * (np.exp(-diff ** 2 / (2 * self.sigma ** 2))).sum(0)
@@ -400,7 +402,7 @@ class Simulation:
         self.evalForce(**kwargs)
         if(self.withMedaD and self.step >= self.startingStep + self.MetaDfreq):
             self.updateMetaD()
-            self.dumpGaussiansPos()
+            # self.dumpGaussiansPos()
         self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
 
     def VVstep_NVT(self, **kwargs):
