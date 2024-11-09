@@ -29,7 +29,7 @@ class Simulation:
                  outname:str = "sim.log",
                  momentname:str = "moment.log",
                  forcenamme:str = "force.log",
-                 #gaussiansname:str = "gaussiansPos.log",
+                 gaussiansname:str = "gaussiansPos.log",
                  gamma:float = 2.5E13,
                  numOfDim:int = 1,
                  startingStep:int = 0,
@@ -132,8 +132,8 @@ class Simulation:
         self.isDeep = isDeep
 
 
-        # if(self.withMedaD):
-        #     self.gaussiansfile = open( gaussiansname, 'w')
+        if(self.withMedaD):
+            self.gaussiansfile = open( gaussiansname, 'w')
         
         #system        
         if R is not None:
@@ -200,7 +200,7 @@ class Simulation:
         self.outfile.close()
         self.momentfile.close()
         self.forcefile.close()
-        #self.gaussiansfile.close()
+        self.gaussiansfile.close()
     
     def evalForce( self, **kwargs ) -> None:
         """
@@ -292,13 +292,16 @@ class Simulation:
                         "{:.6e}".format( self.F[i,2] ) + "\n" )   
         self.forcefile.flush()  
 
-    # def dumpGaussiansPos(self) -> None:
-    #     if(self.step == self.startingStep):
-    #         self.gaussiansfile.write( "pos \n" )
+    def dumpGaussiansPos(self) -> None:  
+        if(self.step == self.startingStep + self.MetaDfreq):
+            self.gaussiansfile.write("Step X Y Z \n")
 
-    #     for i in range( self.Natoms ):
-    #         self.gaussiansfile.write(
-    #                     "{:.6e}".format( self.gaussiansPos[-1] ) + "\n" )       
+        for i in range(self.Natoms):
+            self.gaussiansfile.write( 
+                            str(self.step) + " " + \
+                            "{:.6e}".format( self.R[i,0]*self.fac ) + " " + \
+                            "{:.6e}".format( self.R[i,1]*self.fac ) + " " + \
+                            "{:.6e}".format( self.R[i,2]*self.fac ) + "\n" )  
 
     def readXYZ( self, inpname:str ) -> None:
         """
@@ -397,7 +400,7 @@ class Simulation:
         self.evalForce(**kwargs)
         if(self.withMedaD and self.step >= self.startingStep + self.MetaDfreq):
             self.updateMetaD()
-            # self.dumpGaussiansPos()
+            self.dumpGaussiansPos()
         self.p = (self.p + 0.5 * (self.F + self.imgF) * self.dt) * self.dim
 
     def VVstep_NVT(self, **kwargs):
