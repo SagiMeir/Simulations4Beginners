@@ -100,31 +100,39 @@ params = { "omega":  7.596E13 }
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 seeds = []
-for i in range(5, 15):
+for i in range(15):
   seeds.append(937142 + i)
 
 # MetaD 2 Well - low MetaD rate (repeat)
-for i, seedNum in enumerate(seeds):
-  simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_low" + str(i + 5) + ".xyz", outname = "simForMetaD_low" + str(i + 5) + ".log", momentname="simForMetaD_p_low" + str(i + 5) + ".log", forcenamme="simForMetaD_F_low" + str(i + 5) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=5E-20, sigma=0.5e-12, MetaDfreq=5000, seed=seedNum, gaussiansname="gaussiansPos_1st_" + str(i + 5) + ".log")
-  simForMetaD.run()
+# for i, seedNum in enumerate(seeds):
+#   simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_low" + str(i) + ".xyz", outname = "simForMetaD_low" + str(i) + ".log", momentname="simForMetaD_p_low" + str(i) + ".log", forcenamme="simForMetaD_F_low" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=5E-20, sigma=0.5e-12, MetaDfreq=5000, seed=seedNum, gaussiansname="gaussiansPos_1st_" + str(i) + ".log")
+#   simForMetaD.run()
 
 # MetaD 2 Well with Poisson distribution - low MetaD rate (repeat)
-for i, seedNum in enumerate(seeds):
-  simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDist" + str(i + 5) + ".xyz", outname = "simForMetaD_lowWithDist" + str(i + 5) + ".log", momentname="simForMetaD_p_lowWithDist" + str(i + 5) + ".log", forcenamme="simForMetaD_F_lowWithDist" + str(i + 5) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=5E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, seed=seedNum, gaussiansname="gaussiansPos_2nd_" + str(i + 5) + ".log")
-  simForMetaD.run()
+# for i, seedNum in enumerate(seeds):
+#   simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDist" + str(i) + ".xyz", outname = "simForMetaD_lowWithDist" + str(i) + ".log", momentname="simForMetaD_p_lowWithDist" + str(i) + ".log", forcenamme="simForMetaD_F_lowWithDist" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=5E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, seed=seedNum, gaussiansname="gaussiansPos_2nd_" + str(i) + ".log")
+#   simForMetaD.run()
 
 # MetaD 2 Well (DEEP) - low MetaD rate (repeat)
-for i, seedNum in enumerate(seeds):
-  simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowDeep" + str(i + 5) + ".xyz", outname = "simForMetaD_lowDeep" + str(i + 5) + ".log", momentname="simForMetaD_p_lowDeep" + str(i + 5) + ".log", forcenamme="simForMetaD_F_lowDeep" + str(i + 5) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, isDeep=True, seed=seedNum, gaussiansname="gaussiansPos_3rd_" + str(i + 5) + ".log")
-  simForMetaD.run()
+# for i, seedNum in enumerate(seeds):
+#   simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowDeep" + str(i) + ".xyz", outname = "simForMetaD_lowDeep" + str(i) + ".log", momentname="simForMetaD_p_lowDeep" + str(i) + ".log", forcenamme="simForMetaD_F_lowDeep" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, isDeep=True, seed=seedNum, gaussiansname="gaussiansPos_3rd_" + str(i) + ".log")
+#   simForMetaD.run()
 
 # MetaD 2 Well (DEEP) with Poisson distribution - low MetaD rate (repeat)
+# for i, seedNum in enumerate(seeds):
+#   simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDistDeep" + str(i) + ".xyz", outname = "simForMetaD_lowWithDistDeep" + str(i) + ".log", momentname="simForMetaD_p_lowWithDistDeep" + str(i) + ".log", forcenamme="simForMetaD_F_lowWithDistDeep" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, isDeep=True, seed=seedNum, gaussiansname="gaussiansPos_4th_" + str(i) + ".log")
+#   simForMetaD.run()
+
+#-----------------------------Only for enegy surface-----------------------------------
+
+# for i, seedNum in enumerate(seeds):
+#   simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_low_1000_" + str(i) + ".xyz", outname = "simForMetaD_low_1000_" + str(i) + ".log", momentname="simForMetaD_p_low_1000_" + str(i) + ".log", forcenamme="simForMetaD_F_low_1000_" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=2E-20, sigma=0.5e-12, MetaDfreq=1000, seed=seedNum, gaussiansname="gaussiansPos_1st_1000_" + str(i) + ".log")
+#   simForMetaD.run()
+
 for i, seedNum in enumerate(seeds):
-  simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[1,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDistDeep" + str(i + 5) + ".xyz", outname = "simForMetaD_lowWithDistDeep" + str(i + 5) + ".log", momentname="simForMetaD_p_lowWithDistDeep" + str(i + 5) + ".log", forcenamme="simForMetaD_F_lowWithDistDeep" + str(i + 5) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=6E-20, sigma=0.5e-12, MetaDfreq=5000, withPoissonDist=True, isDeep=True, seed=seedNum, gaussiansname="gaussiansPos_4th_" + str(i + 5) + ".log")
+  simForMetaD = Simulation(dt = 0.833E-15, R= np.array([[0.8,0,0]]) * 1E-10, Nsteps= 1000000, mass = 6.633E-26, kind = ["Ar"], fac = 1E10, xyzname = "simForMetaD_lowWithDist_1000_" + str(i) + ".xyz", outname = "simForMetaD_lowWithDist_1000_" + str(i) + ".log", momentname="simForMetaD_p_lowWithDist_1000_" + str(i) + ".log", forcenamme="simForMetaD_F_lowWithDist_1000_" + str(i) + ".log", mtype="NVT", ftype="DoubleWell", gamma= 2.226e13, startingStep=120000, withMetaD=True, w=2E-20, sigma=0.5e-12, MetaDfreq=1000, withPoissonDist=True, seed=seedNum, gaussiansname="gaussiansPos_2nd_1000_" + str(i) + ".log")
   simForMetaD.run()
 
-
-#print(simForMetaD.gaussiansPos)
 
 print('''
   _____     ____    _   _   ______ 
