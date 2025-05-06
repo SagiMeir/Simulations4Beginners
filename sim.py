@@ -5,7 +5,6 @@ from scipy.constants import Boltzmann as BOLTZMANN
 from scipy.constants import hbar
 
 class Simulation:
-    
     def __init__( self, 
                  dt:float, 
                  temp:float = 298, 
@@ -27,7 +26,9 @@ class Simulation:
                  momentaname:str = "momenta.log",
                  gamma:float = 1E11,
                  VVtype:str = "",
-                 beads = 1
+                 beads = 1,
+                 De = 0,
+                 a = 0
                 ) -> None:
         """
         Parameters
@@ -93,19 +94,20 @@ class Simulation:
         
         #general        
         self.printfreq = printfreq 
-        self.xyzfile = open( xyzname, 'w' ) 
+        #self.xyzfile = open( xyzname, 'w' ) 
         self.outfile = open( outname, 'w' ) 
         #self.momentafile = open(momentaname, 'w')
 
-        self.openfiles = []
-        self.filenames =["sim" + str(i) + ".xyz" for i in range(beads)]
-        for file in self.filenames:
-                self.openfiles.append( open( file, 'w' ) )
+        #self.openfiles = []
+        #self.filenames =["sim" + str(i) + ".xyz" for i in range(beads)]
+        #for file in self.filenames:
+        #        self.openfiles.append( open( file, 'w' ) )
 
 
         
         #simulation
-        self.temp=temp
+
+        self.temp = temp
         self.Nsteps = Nsteps 
         self.dt = dt 
         self.seed = seed 
@@ -114,7 +116,13 @@ class Simulation:
         self.VVtype = VVtype
         self.beads = beads
         self.gamma = gamma
-        self.beadomega = np.sqrt(self.beads)*BOLTZMANN*self.temp/hbar
+        self.beadomega = np.sqrt(beads)*BOLTZMANN*temp/hbar
+        #Morse
+        self.De = De 
+        self.a = a
+        
+        #print(self.a, "_____" ,self.De)
+
 
         
         #system        
@@ -143,13 +151,13 @@ class Simulation:
         else:
             self.F = np.zeros( (self.Natoms,3,self.beads) )
             self.U = 0.0
-        
+
         
         #set seed
         np.random.seed( self.seed )
         
         #check force type
-        if ( ftype == "Harm" or ftype == "Anharm"):
+        if ( ftype == "Harm" or ftype == "Anharm"  or ftype == "Morse"):
             self.ftype = "eval" + ftype
         else:
             raise ValueError("Wrong ftype value - use Harm or Anharm.")
@@ -164,7 +172,7 @@ class Simulation:
         None.
         """
         # self.momentafile.close()
-        self.xyzfile.close()
+        #self.xyzfile.close()
         self.outfile.close()
         # for file in self.openfiles:
         #    file.close()
@@ -223,7 +231,7 @@ class Simulation:
         -------
         None.
         """
-        # self.xyzname = "sim"+str(i)+".xyz"    
+        #self.xyzname = "sim"+str(i)+".xyz"    
         
 
 
@@ -258,22 +266,25 @@ class Simulation:
         self.Natoms = self.R.shape[0]
         
         
+        
 ################################################################
 ################## NO EDITING ABOVE THIS LINE ##################
 ################################################################
 
     def calcQE(self):
-        #print(0.5*self.Natoms*BOLTZMANN*self.temp)
-        #print((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * (- self.potF))
-        #print(self.U/self.beads)
-        self.QE = 0.5*self.Natoms*BOLTZMANN*self.temp+((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * ( -self.potF )/(self.beads*2)).sum() #אסטימטור לאנרגיה הקוונטית
-        self.QE += self.U/self.beads
+        '''
+        calculate the energy estimator - do not need to divide by P (U is devided in evalharm)
+        '''
 
-        #print(self.QE)
+        self.QE = 0.5*self.Natoms*BOLTZMANN*self.temp
+        self.QE += ((self.R-(self.R.sum(-1)/self.beads)[:,:,np.newaxis]) * ( -self.potF )).sum() / 2 #אסטימטור לאנרגיה הקוונטית
+        self.QE += self.U
 
-        #print("--------")
 
-    def CalcSpringEF(self):#מחשב את האנרגיה של הקפיץ ואז צריך להוסיף לאנרגיבה הכוללת
+    def CalcSpringEF(self):
+        '''
+        claculate the spring energy
+        '''
         self.totspringE = 0 
         for atom in range(self.Natoms):
             for ibead in range(self.beads-1):
@@ -281,23 +292,18 @@ class Simulation:
                 self.F[atom,:,ibead] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[atom,:,ibead] - self.R[atom,:,ibead+1] - self.R[atom,:,ibead-1])
             self.totspringE += 0.5 * self.mass * self.beadomega**2*(self.R[atom,0,self.beads-1] - self.R[atom,0,0])**2
             self.F[atom,:,self.beads-1] = -1 * self.mass * self.beadomega ** 2 * (2*self.R[atom,:,self.beads-1] - self.R[atom,:,0] - self.R[atom,:,self.beads-2]) 
-            #print(self.F)
 
     def evalVVstep( self, **kwargs ) -> None:
         
         getattr(self, "VVstep" + self.VVtype)(**kwargs)
 
     def VVstep_NVT(self,**kwargs):
-        #print("1")
+
         xi = np.random.randn(1,3,self.beads)
         xi[0,1:3,:] = np.array([0 for i in range(self.beads)])
-        #print(xi)
-        #print( self.p)
+
         self.p = np.exp(-1*self.gamma*self.dt/2)*self.p + np.sqrt(BOLTZMANN*self.mass*self.temp)*np.sqrt(1-np.exp(-1*self.gamma*self.dt))*xi
-        #print (self.p)
-        
-        
-        #print("-")
+
         self.VVstep(**kwargs)
 
         xi = np.random.randn(1,3,self.beads)
@@ -345,26 +351,36 @@ class Simulation:
         None. Sets the value of self.F, self.U and self.K
         """
         
-        self.potF = - self.mass * omega ** 2* self.R / self.beads
-        self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  
+        self.potF = - self.mass * omega ** 2* self.R / self.beads 
+        self.U = 0.5 * self.mass * ((omega * self.R) ** 2).sum()  / self.beads
 
+    def evalMorse(self, omega):
+
+        zeroYZ = np.zeros(np.shape(self.R))
+        zeroYZ[0,0,:] = np.array([np.array(1)])
+
+        self.U = ((self.De*(1 - np.exp(-self.a*self.R))**2)* zeroYZ).sum() / self.beads
+        self.potF = - 2 * self.De * self.a * (1 - np.exp ( -self.a * self.R ) * zeroYZ) * np.exp( - self.a * self.R) * zeroYZ / self.beads 
+        # if self.step > 200000 and self.step < 200050:
+        #     print(self.R)
+        # # print(self.potF)
+    
     def VVstep( self, **kwargs ):
         """
         THIS FUNCTIONS PERFORMS ONE VELOCITY VERLET STEP.
-        Returns
+        Returns'
         -------
         None. Sets self.R, self.p.
         """
 
-        self.p = (self.p).copy() + 0.5 * (self.F+self.potF).copy() * self.dt
-
+        self.p = (self.p).copy() + 0.5 * (self.F + self.potF).copy() * self.dt
 
         self.R = (self.R).copy() + (self.p).copy() * self.dt / self.mass 
-
         self.evalForce(**kwargs)
         self.CalcSpringEF()
 
         self.p = (self.p).copy() + 0.5 * (self.F + self.potF).copy() * self.dt
+
 
     def dumpMomnta( self ) -> None:
         if( self.step == 0 ):
@@ -380,7 +396,6 @@ class Simulation:
         self.momentafile.flush()
 
     def run( self, **kwargs ):
-        self.totspringE = 0
         """
         THIS FUNCTION DEFINES WHAT THE SIMULATION DOES, GIVEN AN INSTANCE OF 
         THE SIMULATION CLASS. YOU WILL NEED TO:
@@ -395,20 +410,22 @@ class Simulation:
         -------
         None.
         """
-
+        # print("1", self.U)
+        self.totspringE = 0
         self.evalForce(**kwargs)
-        if(self.beadomega >= self.gamma):
-            self.gamma = self.beadomega
-        #print(self.Natoms)
+        # print("2", self.U)
         for self.step in range(self.Nsteps):
             self.evalVVstep(**kwargs)
+            # print("3", self.U)
             self.CalcKinE()
+            # print("4", self.U)
             self.calcQE()
             self.E =  self.K + self.U + self.totspringE
 
             if(self.step % self.printfreq == 0):
-
+                # self.dumpMomnta()
+                # self.dumpXYZ() 
                 self.dumpThermo()
-                #self.dumpMomnta()
-                #self.dumpXYZ()
+
+             
         
