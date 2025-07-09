@@ -297,7 +297,7 @@ class Simulation:
         ################################################################
 
         self.p = self.p + self.dt/2 * self.F
-        self.R = self.R + self.dt * ⋅(self.p/self.mass)
+        self.R = self.R + self.dt * (self.p/self.mass)
         self.evalForce(**kwargs)
         ​self.p = self.p + self.dt/2 * self.F
 
