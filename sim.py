@@ -245,7 +245,8 @@ class Simulation:
         ################################################################
         ##################### YOUR CODE GOES HERE ######################
         ################################################################
-        pass
+
+        self.K = (self.p**2).sum()/(2*self.mass)
 
     def sampleMB( self, removeCM=True ):
         """
@@ -280,7 +281,9 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################
-        pass
+    
+        self.U = (self.mass/2) * (omega**2) * self.R**2.sum()
+        self.F = (self.mass * omega**2 * self.R) * (-1)
 
     def VVstep( self, **kwargs ):
         """
@@ -292,7 +295,11 @@ class Simulation:
         ################################################################
         ####################### YOUR CODE GOES HERE ####################
         ################################################################
-        pass
+
+        self.p = self.p + self.dt/2 * self.F
+        self.R = self.R + self.dt * ⋅(self.p/self.mass)
+        self.evalForce(**kwargs)
+        ​self.p = self.p + self.dt/2 * self.F
 
     def run( self, **kwargs ):
         """
