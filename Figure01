@@ -1,0 +1,36 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_theme(style="ticks", rc={'axes.labelsize': 14})
+
+differences = []
+beforeDt: float = 0
+found: bool = False
+
+dt_values = np.linspace(0.5e-15, 1.0e-15, 7)
+for i, dt in enumerate(dt_values):
+    df = pd.read_csv("sim_" + str(i) + ".log", sep='\s+')
+    energy = df["E"].values
+    initial_energy = energy[0]
+    diff_percent = np.abs((energy - initial_energy) * 100 / initial_energy)
+    max_diff = np.max(diff_percent)
+
+    if max_diff >= 0.1 and not found:
+        print("Max \u0394t with difference smaller than 0.1%:" , beforeDt)
+        found = True
+        break
+
+    differences.append(max_diff)
+    beforeDt = dt
+
+fig, ax = plt.subplots(7,1,figsize=(6,12))
+for i, dt in enumerate(dt_values):
+    df = pd.read_csv("sim_" + str(i) + ".log", sep='\s+')
+    ax[i].plot(df["step"].values, (df["E"].values - df['E'].values[0]) * 100/ df['E'].values[0])
+    ax[i].set_title("dt = " + str(dt * 1E15)[:6] + "fs")
+    ax[i].set_xlabel('t [steps]')
+    ax[i].set_ylabel('\u0394t E/E$ [%]')
+plt.tight_layout()
+plt.show()
