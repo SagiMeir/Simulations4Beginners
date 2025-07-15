@@ -1,0 +1,25 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_theme(style="ticks",rc={'axes.labelsize':14},palette='tab10')
+
+x: int = 5 ** (-10)
+# hbar is in J * s
+hbar: float = 1.05457182 * (10**(-34))
+omega: float = (50 * (10**(-3)) * (1.6 * (10**(-19))))/hbar
+
+# omega in hrz
+print("Omega (in Hz): " , omega)
+
+# Calculation of mass
+mass: float = 6.6335209 * (10**(-26))
+print("Mass (in kg): " , mass)
+
+# Energy in J
+J: float = 0.5 * (x * omega) ** 2 * mass
+print("\nEnergy (in Joules): " , J)
+
+# Energy in eV
+eV: float = (6.242 ** (-18)) * J
+print("Energy (in eV): " , eV)
