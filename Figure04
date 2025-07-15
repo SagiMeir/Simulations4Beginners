@@ -1,0 +1,32 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_theme(style="ticks", rc={"axes.labelsize": 14}, palette="tab10")
+
+posX = []
+
+with open("sim_0.xyz", "r") as f:
+    while True:
+        if not f.readline():
+            break
+
+        f.readline()
+
+        line = f.readline()
+        if not line:
+            break
+
+        split_line = line.strip().split()
+        if len(split_line) >= 2:
+            posX.append(float(split_line[1]))
+
+if not posX:
+    raise ValueError("No positions found — check file structure.")
+
+plt.figure(figsize=(6, 5))
+plt.hist(posX, bins=25, color = 'seagreen', edgecolor = 'black')
+plt.xlabel("Position [$\AA$]")
+plt.ylabel("Frequency")
+plt.title("Histogram of X Positions")
+plt.tight_layout()
+plt.show()
