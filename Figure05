@@ -1,0 +1,24 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_theme(style="ticks", rc={'axes.labelsize': 14}, palette='tab10')
+
+df = pd.read_csv("sim_3.log", sep=r'\s+')
+
+# Automatically select first numeric column
+numeric_cols = df.select_dtypes(include='number').columns
+if len(numeric_cols) == 0:
+    raise ValueError("No numeric columns found in data")
+
+col = numeric_cols[0]
+
+plt.figure(figsize=(8, 5))
+plt.hist(df[col], bins=25, color = 'white', edgecolor = 'black')
+plt.xlabel(f'{col} [Kg * m / s]')
+plt.ylabel('frequency')
+plt.title(f'Momenta Histogram of {col}')
+plt.grid(True, linestyle=':', linewidth=0.8)
+plt.tight_layout()
+plt.show()
