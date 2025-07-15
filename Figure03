@@ -1,0 +1,19 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_theme(style="ticks",rc={'axes.labelsize':14},palette='tab10')
+
+df = pd.read_csv("sim_3.log", sep = '\s+')
+
+plt.figure(figsize = (8, 5))
+plt.title("Potential, Kinetic, and Total Energy vs Time", fontsize = 14)
+plt.xlabel("Time [steps]", fontsize = 12)
+plt.ylabel("Energy [J]", fontsize = 12)
+plt.plot(df['step'], df['U'], label = "Potential Energy (U)", color = "pink", linewidth = 2)
+plt.plot(df['step'], df['K'], label="Kinetic Energy (K)", color="purple", linewidth = 2)
+plt.plot(df['step'], df['E'], label="Total Energy (E)", color = "green", linewidth = 2, linestyle = "--")
+plt.legend(fontsize = 11)
+plt.grid(True, linestyle = ":", linewidth = 0.8)
+plt.tight_layout()
+plt.show()
