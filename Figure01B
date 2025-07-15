@@ -1,0 +1,39 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_theme(style="ticks",rc={'axes.labelsize':14},palette='tab10')
+
+differences = []
+beforeDt: float = None
+found: bool = False
+
+dt_values = np.linspace(0.5e-15, 1.0e-15, 7)
+for i, dt in enumerate(dt_values):
+    df = pd.read_csv("sim_" + str(i) + ".log", sep = '\s+')
+    energy = df["E"].values
+    initEnergy = energy[0]
+    diff_percent = np.abs(((energy - initEnergy) * 100) / initEnergy)
+    max_diff = np.max(diff_percent)
+
+    if max_diff >= 0.1 and not found:
+      if beforeDt is not None:
+        print("Max \u0394tt with difference smaller than 0.1%:", beforeDt)
+      else:
+        print("All tested \u0394tt values conserve energy within 0.1%")
+      found = True
+
+    differences.append(max_diff)
+    beforeDt = dt
+
+
+plt.figure(figsize = (6, 5))
+plt.plot(dt_values, differences, marker = 'o', color = 'blue', linewidth = 2, label = "\u0394t E / E$")
+plt.axhline(0.1, color = "red", linestyle = "--", linewidth=1.5, label="Max error: 0.1%")
+plt.title("\u0394t t with Minimal Error", fontsize = 14)
+plt.xlabel("\u0394t [s]", fontsize=12)
+plt.ylabel("Max \u0394t E / E [%]", fontsize = 12)
+plt.grid(True, linestyle=':', linewidth = 0.8)
+plt.legend(fontsize = 11)
+plt.tight_layout()
+plt.show()
