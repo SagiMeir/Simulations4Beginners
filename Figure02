@@ -1,0 +1,30 @@
+import math
+import matplotlib.pyplot as plt
+import numpy as np
+
+time = []
+posX = []
+with open("sim_0.xyz", "r") as f:
+    while True:
+        lines = [f.readline() for _ in range(3)]
+        if not all(lines):
+            break
+
+        t = float(lines[1].strip().split()[1])
+        x = float(lines[2].strip().split()[1])
+        time.append(t)
+        posX.append(x)
+
+omega =  75860172330415.58
+dt = 8.333333333333334e-16
+calc = [posX[0] * math.cos(omega * t * dt) for t in time]
+
+plt.plot(time, posX, label="Simulation")
+plt.plot(time, calc, label="Theoretical", linestyle='--', color='red')
+plt.xlabel("t [steps]")
+plt.ylabel("Position [$\AA$]")
+plt.title("Position vs Time")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
