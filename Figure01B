@@ -2,38 +2,48 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set_theme(style="ticks",rc={'axes.labelsize':14},palette='tab10')
 
-differences = []
-beforeDt: float = None
-found: bool = False
+sns.set_theme(style="ticks", rc={'axes.labelsize':14}, palette='tab10')
 
-dt_values = np.linspace(0.5e-15, 1.0e-15, 7)
-for i, dt in enumerate(dt_values):
-    df = pd.read_csv("sim_" + str(i) + ".log", sep = '\s+')
+max_allowed_error = 0.1
+largest_valid_dt = None
+
+dt_list = []
+avg_energy_list = []
+
+i = 0
+while True:
+    filename = f"sim_{i}.log"
+    try:
+        df = pd.read_csv(filename, sep=r'\s+')
+    except FileNotFoundError:
+        break
+
+    steps = df["step"].values
+    dt = (steps[1] - steps[0]) * 1e-15
+    dt_list.append(dt)
+
     energy = df["E"].values
-    initEnergy = energy[0]
-    diff_percent = np.abs(((energy - initEnergy) * 100) / initEnergy)
-    max_diff = np.max(diff_percent)
+    avg_energy = np.mean(energy)
+    avg_energy_list.append(avg_energy)
 
-    if max_diff >= 0.1 and not found:
-      if beforeDt is not None:
-        print("Max \u0394tt with difference smaller than 0.1%:", beforeDt)
-      else:
-        print("All tested \u0394tt values conserve energy within 0.1%")
-      found = True
+    deviation = np.abs((energy - energy[0]) * 100 / energy[0])
+    if np.all(deviation < max_allowed_error):
+        if largest_valid_dt is None or dt > largest_valid_dt:
+            largest_valid_dt = dt
 
-    differences.append(max_diff)
-    beforeDt = dt
+    i += 1
 
+if largest_valid_dt is not None:
+  print(f"Largest valid Δt with < 0.1% deviation: {largest_valid_dt:.2e} s")
 
-plt.figure(figsize = (6, 5))
-plt.plot(dt_values, differences, marker = 'o', color = 'blue', linewidth = 2, label = "\u0394t E / E$")
-plt.axhline(0.1, color = "red", linestyle = "--", linewidth=1.5, label="Max error: 0.1%")
-plt.title("\u0394t t with Minimal Error", fontsize = 14)
-plt.xlabel("\u0394t [s]", fontsize=12)
-plt.ylabel("Max \u0394t E / E [%]", fontsize = 12)
-plt.grid(True, linestyle=':', linewidth = 0.8)
-plt.legend(fontsize = 11)
+plt.figure(figsize=(7, 5))
+plt.plot(dt_list, avg_energy_list, marker = 'o', linewidth = 2, label = "Average Energy")
+plt.axvline(3.50e-13, color = 'red', linestyle = '--', label = r"Last $\Delta t$ where energy is conserved better than 0.1\%")
+plt.title("Average Total Energy vs Time Step Δt")
+plt.xlabel("Δt [s]")
+plt.ylabel("Average Total Energy")
+plt.grid(True, linestyle = ':')
+plt.legend()
 plt.tight_layout()
 plt.show()
