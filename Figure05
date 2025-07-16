@@ -1,24 +1,43 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sns.set_theme(style="ticks", rc={'axes.labelsize': 14}, palette='tab10')
+sns.set_theme(style="ticks", rc={"axes.labelsize": 14}, palette="tab10")
 
-df = pd.read_csv("sim_3.log", sep=r'\s+')
+positions = []
+times = []
+mass = 6.6335209e-26
 
-# Automatically select first numeric column
-numeric_cols = df.select_dtypes(include='number').columns
-if len(numeric_cols) == 0:
-    raise ValueError("No numeric columns found in data")
+for i in range(7):
+  positions = []
+  times = []
+  with open("sim_0.xyz", "r") as f:
+    while True:
+        lines = [f.readline() for _ in range(3)]
+        if not all(lines):
+            break
+        try:
+            t = float(lines[1].strip().split()[1])
+            x = float(lines[2].strip().split()[1])
+            times.append(t)
+            positions.append(x)
+        except (IndexError, ValueError):
+            continue
 
-col = numeric_cols[0]
+  positions = np.array(positions)
+  times = np.array(times)
 
-plt.figure(figsize=(8, 5))
-plt.hist(df[col], bins=25, color = 'white', edgecolor = 'black')
-plt.xlabel(f'{col} [Kg * m / s]')
-plt.ylabel('frequency')
-plt.title(f'Momenta Histogram of {col}')
-plt.grid(True, linestyle=':', linewidth=0.8)
-plt.tight_layout()
-plt.show()
+  unique_mask = np.diff(times, prepend=np.nan) > 0
+  positions = positions[unique_mask]
+  times = times[unique_mask]
+
+  velocities = np.gradient(positions, times)
+  momenta = mass * velocities
+
+  plt.figure(figsize=(6, 5))
+  sns.histplot(momenta, bins=25, color='seagreen', edgecolor='black')
+  plt.xlabel("Momentum [kg·m/s]")
+  plt.ylabel("Count")
+  plt.title("Histogram of Particle Momenta at sim no. 0")
+  plt.tight_layout()
+  plt.show()
