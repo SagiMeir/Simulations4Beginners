@@ -10,27 +10,37 @@ beforeDt: float = 0
 found: bool = False
 
 dt_values = np.linspace(0.5e-15, 1.0e-15, 7)
+
 for i, dt in enumerate(dt_values):
-    df = pd.read_csv("sim_" + str(i) + ".log", sep='\s+')
-    energy = df["E"].values
-    initial_energy = energy[0]
+    df = pd.read_csv(f"sim_{i}.log", sep='\s+')
+    
+    energy = df["E"]
+    initial_energy = energy.iloc[0]
     diff_percent = np.abs((energy - initial_energy) * 100 / initial_energy)
-    max_diff = np.max(diff_percent)
+    max_diff = diff_percent.max()
 
     if max_diff >= 0.1 and not found:
-        print("Max \u0394t with difference smaller than 0.1%:" , beforeDt)
+        print("Max Δt with difference smaller than 0.1%:", beforeDt)
         found = True
         break
 
     differences.append(max_diff)
     beforeDt = dt
 
-fig, ax = plt.subplots(7,1,figsize=(6,12))
+fig, ax = plt.subplots(len(dt_values), 1, figsize = (6, 12), sharex = True)
+
 for i, dt in enumerate(dt_values):
-    df = pd.read_csv("sim_" + str(i) + ".log", sep='\s+')
-    ax[i].plot(df["step"].values, (df["E"].values - df['E'].values[0]) * 100/ df['E'].values[0])
-    ax[i].set_title("dt = " + str(dt * 1E15)[:6] + "fs")
-    ax[i].set_xlabel('t [steps]')
-    ax[i].set_ylabel('\u0394t E/E$ [%]')
+    df = pd.read_csv(f"sim_{i}.log", sep='\s+')
+    step = df["step"]
+    energy = df["E"]
+    initial_energy = energy.iloc[0]
+    delta_percent = (energy - initial_energy) * 100 / initial_energy
+
+    ax[i].plot(step, delta_percent, color = 'tab:blue', linewidth = 1.5)
+    ax[i].set_title(f"\u0394tt = {dt * 1e15:.3f} fs")
+    ax[i].set_ylabel("\u0394tE/E [%]")
+
+
+ax[-1].set_xlabel("Step")
 plt.tight_layout()
 plt.show()
