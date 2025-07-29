@@ -39,6 +39,7 @@ class Simulation:
                  notUseMB:bool = False,
                  withPoissonDist:bool = False,
                  isDeep:bool = False,
+                 oneGaussian:bool = False
                  ) -> None:
         """
         Parameters
@@ -130,6 +131,8 @@ class Simulation:
         self.numOfGaussians = 0
         self.stepsPos = []
         self.isDeep = isDeep
+        self.oneGaussian = oneGaussian
+        self.stopAddGaussian = False
 
 
         if(self.withMedaD):
@@ -376,14 +379,17 @@ class Simulation:
         self.F = (-4 * A * self.R ** 3) + (2 * B * self.R) 
         self.U = (A * self.R ** 4).sum() - (B * self.R ** 2).sum()
 
+
     def updateMetaD(self):
         if(self.withPoissonDist and self.step == self.stepsPos[self.numOfGaussians]):
             self.gaussiansPos.append(self.R)
             self.dumpGaussiansPos()
             self.numOfGaussians += 1
-        if(not self.withPoissonDist and self.step % self.MetaDfreq == 0):
+        if(not self.withPoissonDist and (self.step - self.startingStep) % self.MetaDfreq == 0 and not self.stopAddGaussian):
             self.gaussiansPos.append(self.R)
             self.dumpGaussiansPos()
+            if(self.oneGaussian):
+                self.stopAddGaussian = True
 
         diff = self.R[np.newaxis,:,:] - np.array(self.gaussiansPos)
         self.Vbias = self.w * (np.exp(-diff ** 2 / (2 * self.sigma ** 2))).sum(0)
